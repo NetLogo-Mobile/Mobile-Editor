@@ -1,0 +1,62 @@
+
+<head>
+	<meta id="viewport" name="viewport" content="width=560,user-scalable=no,viewport-fit=cover">
+	<link rel="stylesheet" href="lib/codemirror.css">
+	<link rel="stylesheet" href="addon/hint/show-hint.css">
+	<link rel="stylesheet" href="lib/netlogo.css">
+	<meta charset="UTF-8" />
+	<script src="lib/codemirror.js"></script>
+	<script src="addon/mode/simple.js"></script>
+	<script src="addon/hint/show-hint.js"></script>
+	<script src="lib/zepto.min.js"></script>
+	<script src="lib/netlogo.js"></script>
+</head>
+<body>
+	<div id="Main-Editor">
+		<div id="Main-Tips">Click to apply the changes on your model.</div>
+		<div id="Main-CodeMirror"></div>
+		<div class="Overlays">
+			<div id="Rotate-Screen" class="Backdrop">
+				<img src="images/rotate.svg" />
+				<p class="Localized">编辑器支持竖屏使用。旋转屏幕获得最佳体验！</p>
+			</div>
+		</div>
+	</div>
+    <script type="text/javascript">
+		(function() {
+			// Script loader
+			window.LoadScript = function (Name) {
+				var Element = document.createElement("script");
+				Element.src = Name + "?" + Date.now();
+				document.body.appendChild(Element);
+			};
+			// Basic scripts
+			window.modelConfig = {};
+			LoadScript("tortoise-editor.js");
+			// Load event
+			window.addEventListener("load", function () { 
+				Editor.Initialize();
+				PostMessage(navigator.userAgent); 
+			})
+			// Messenger
+			if (navigator.userAgent.indexOf("ZFBrowser") != -1) {
+				window.PostMessage = function(Data) {
+					if (typeof ZFCallback != "undefined") ZFCallback(Data);
+				};
+			} else {
+				if (window && window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.unityControl) {
+					window.PostMessage = function (Result) {
+						window.webkit.messageHandlers.unityControl.postMessage(Result);
+						return Result;
+					};
+				} else {
+					window.PostMessage = function (Result) {
+						window.location = 'unity:' + Result;
+						return Result;
+					}
+				}
+			}
+		})();
+	</script>
+</body>
+</html>

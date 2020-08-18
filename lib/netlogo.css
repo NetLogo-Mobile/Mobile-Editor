@@ -1,0 +1,156 @@
+/* NetLogo Mobile CodeMirror Stylesheet */
+
+/* Layout */
+html, body {
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	font-size: 30px;
+	font-family: Arial, Helvetica, sans-serif;
+}
+p {
+	margin: 0;
+}
+#Main-Editor {
+	width: 100%;
+	height: 100%;
+	position: relative;
+	flex-direction: column;
+}
+.CodeMirror {
+	width: 100%;
+	height: 100%;
+}
+.CodeMirror,
+.CodeMirror-hints {
+	font-family: Consolas, monospace;
+	font-family: Consolas, monospace;
+}
+.CodeMirror-linenumber {
+    padding: 2px 8px 0 26px;
+	font-size: 28px;
+}
+.CodeMirror-marker-error {
+	display: inline-block;
+	width: 22px;
+	height: 22px;
+	margin: 8px 3px;
+	background-image: url(../images/error.svg);
+}
+.CodeMirror-context-tips {
+	cursor: pointer;
+	padding: 5px 10px;
+	font-size: 28px;
+	line-height: 125%;
+	background: #FFFFE0;
+}
+.CodeMirror pre.CodeMirror-line, .CodeMirror pre.CodeMirror-line-like {
+	padding: 0 4px 0 8px;
+}
+
+/* Overlays */
+.Overlays div {
+	top: 50%;
+	left: 50%;
+	z-index: 255;
+	display: none;
+	position: absolute;
+	border-radius: 20px;
+	transform: translate(-50%, -50%) !important;
+}
+.Backdrop {
+	background: rgba(234, 234, 234, 0.9);
+}
+@supports ((-webkit-backdrop-filter: blur(2em)) or (backdrop-filter: blur(2em))) {
+	.Backdrop  {
+		backdrop-filter: blur(3px);
+		-webkit-backdrop-filter: blur(3px);
+		background: rgba(234, 234, 234, 0.6);
+	}
+}
+
+/* Dialog: Rotate Screen */
+#Rotate-Screen {
+	width: 460px;
+	height: 70px;
+	padding: 20px;
+	cursor: pointer;
+}
+#Rotate-Screen img {
+	float: left;
+	width: 70px;
+	height: 70px;
+	margin: 0 16px 0 0;
+}
+#Rotate-Screen p {
+	font-size: 27px;
+	line-height: 37px;
+}
+
+#Main-Tips {
+	top: 0;
+	width: 100%;
+	cursor: pointer;
+	padding: 15px;
+	display: none;
+	z-index: 255;
+	position: fixed;
+	font-size: 30px;
+	background: #FFFFE0;
+	-webkit-user-select: none;
+}
+
+/* Styles */
+.Backdrop {
+	-webkit-backdrop-filter: blur(10px);
+}
+
+/*
+Copyright (C) 2011 by MarkLogic Corporation
+Author: Mike Brevoort <mike@brevoort.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
+
+/* Adapted by John Chen for NetLogo Mobile */
+
+.cm-s-netlogo-default span.cm-keyword { line-height: 1em; font-weight: bold; color: #007F69; }
+.cm-s-netlogo-default span.cm-command { color: #0000AA; }
+.cm-s-netlogo-default span.cm-atom { color: #6C8CD5; }
+.cm-s-netlogo-default span.cm-number { color: #963700; }
+.cm-s-netlogo-default span.cm-constant { color: #963700; }
+.cm-s-netlogo-default span.cm-def { text-decoration:underline; }
+.cm-s-netlogo-default span.cm-variable { color: black; }
+.cm-s-netlogo-default span.cm-variable-2 { color:black; }
+.cm-s-netlogo-default span.cm-variable-3, .cm-s-netlogo-default span.cm-type { color: black; }
+.cm-s-netlogo-default span.cm-property {}
+.cm-s-netlogo-default span.cm-operator {}
+.cm-s-netlogo-default span.cm-comment { color: #5A5A5A; font-style: italic; }
+.cm-s-netlogo-default span.cm-string { color: #963700; }
+.cm-s-netlogo-default span.cm-meta { color: yellow; }
+.cm-s-netlogo-default span.cm-qualifier { color: grey; }
+.cm-s-netlogo-default span.cm-builtin { color: #7EA656; }
+.cm-s-netlogo-default span.cm-bracket { color: #cc7; }
+.cm-s-netlogo-default span.cm-tag { color: #3F7F7F; }
+.cm-s-netlogo-default span.cm-attribute { color: #7F007F; }
+.cm-s-netlogo-default span.cm-error { color: #FFF; background: #CC2200; }
+.cm-s-netlogo-default span.cm-reporter { color: #660096; }
+
+.cm-s-netlogo-default .CodeMirror-activeline-background { background: #e8f2ff; }
+.cm-s-netlogo-default .CodeMirror-matchingbracket { outline:1px solid grey; color:black !important; background:yellow; }
