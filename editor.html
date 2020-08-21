@@ -4,6 +4,7 @@
 	<link rel="stylesheet" href="lib/codemirror.css">
 	<link rel="stylesheet" href="addon/hint/show-hint.css">
 	<link rel="stylesheet" href="lib/netlogo.css">
+	<link rel="stylesheet" href="css/command.css">
 	<meta charset="UTF-8" />
 	<script src="lib/codemirror.js"></script>
 	<script src="addon/mode/simple.js"></script>
@@ -12,6 +13,29 @@
 	<script src="lib/netlogo.js"></script>
 </head>
 <body>
+	<div class="command">
+		<div class="command-output">
+			<p class="Localized comment">;; Instructions</p>
+			<p class="Localized comment">;; Firstly, choose an object</p>
+		</div>
+		<div class="command-line">
+			<div class="wrapper">
+				<select name="objectives" id="objectives">
+					<option value="observer">Observer</option>
+					<option value="patches">Patches</option>
+					<option value="link">Link</option>
+					<option value="turtle">Turtle</option>
+				</select>
+				<input id="commandInput" type="text" autocorrect="off" autocapitalize="off">
+			</div>
+		</div>
+		<div class="Overlays">
+			<div id="Rotate-Screen" class="Backdrop">
+				<img src="images/rotate.svg" />
+				<p class="Localized">编辑器支持竖屏使用。旋转屏幕获得最佳体验！</p>
+			</div>
+		</div>
+	</div>
 	<div id="Main-Editor">
 		<div id="Main-Tips">Click to apply the changes on your model.</div>
 		<div id="Main-CodeMirror"></div>
@@ -22,7 +46,7 @@
 			</div>
 		</div>
 	</div>
-    <script type="text/javascript">
+		<script type="text/javascript">
 		(function() {
 			// Script loader
 			window.LoadScript = function (Name) {
@@ -34,9 +58,9 @@
 			window.modelConfig = {};
 			LoadScript("tortoise-editor.js");
 			// Load event
-			window.addEventListener("load", function () { 
+			window.addEventListener("load", function () {
 				Editor.Initialize();
-				PostMessage(navigator.userAgent); 
+				PostMessage(navigator.userAgent);
 			})
 			// Messenger
 			if (navigator.userAgent.indexOf("ZFBrowser") != -1) {
@@ -54,6 +78,25 @@
 						window.location = 'unity:' + Result;
 						return Result;
 					}
+				}
+			}
+			// Command Certer
+			window.addEventListener("load", function () {
+				Commands.Show();
+				const scrollHeight = document.querySelector('.command-output').scrollHeight;
+				document.querySelector('.command-output').scrollTop = scrollHeight;
+			})
+
+			document.getElementById('commandInput').onkeypress = function(e){
+				if (!e) e = window.event;
+				var keyCode = e.keyCode || e.which;
+				if (keyCode == '13'){
+					const content = $('#commandInput').val();
+					const objective = $('select').val();
+					Commands.PrintInput(objective, content);
+					const scrollHeight = document.querySelector('.command-output').scrollHeight;
+					document.querySelector('.command-output').scrollTop = scrollHeight;
+					document.querySelector('#commandInput').value = ''
 				}
 			}
 		})();
