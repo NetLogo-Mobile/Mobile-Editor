@@ -242,7 +242,9 @@ Localized = function() {
 Commands = function() {
 	var Commands = {};
 
+	// Store [Objective, Input Content]
 	Contents = [];
+	// Command center would be disabled before compile output come out.
 	Commands.Disabled = false;
 
 	// Hide MainEditor and Command Center would show up
@@ -269,10 +271,12 @@ Commands = function() {
 		`)
 	}
 
+	// Clear the input box of Command Center
 	Commands.ClearInput = function() {
 		document.querySelector('#commandInput').value = '';
 	}
 
+	// After user entered input, screen view should scroll down to the botom line
 	Commands.scrollDownToBottom = function() {
 		const scrollHeight = document.querySelector('.command-output').scrollHeight;
 		document.querySelector('.command-output').scrollTop = scrollHeight;
@@ -293,6 +297,7 @@ Commands = function() {
 		return Contents;
 	}
 
+	// Call the unity engine to compile the command
 	Commands.Call = function(Code) {
 		PostMessage(Code);
 	}
