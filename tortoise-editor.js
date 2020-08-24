@@ -259,7 +259,7 @@ Commands = function() {
 
 	Commands.PrintInput = function(Objective, Content) {
 		$('.command-output').append(`
-			<p class="Localized comment">${Objective}> ${Content}</p>
+			<p class="Localized comment">${Localized.Get(Objective)}> ${Content}</p>
 		`)
 	}
 
