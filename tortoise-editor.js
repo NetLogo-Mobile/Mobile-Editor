@@ -242,10 +242,14 @@ Localized = function() {
 Commands = function() {
 	var Commands = {};
 
+	Contents = [];
+
+	// Hide MainEditor and Command Center would show up
 	Commands.Show = function() {
 		$('#Main-Editor').css("display", "none");
 	}
 
+	// Hide Command Center and MainEditor would show up
 	Commands.Hide = function() {
 		$('#Main-Editor').css("display", "block");
 	}
@@ -262,8 +266,29 @@ Commands = function() {
 		`)
 	}
 
-	Commands.Compile = function(Content) {
-		return Content
+	Commands.ClearInput = function() {
+		document.querySelector('#commandInput').value = '';
+	}
+
+	Commands.scrollDownToBottom = function() {
+		const scrollHeight = document.querySelector('.command-output').scrollHeight;
+		document.querySelector('.command-output').scrollTop = scrollHeight;
+	}
+
+	Commands.SetContent = function(Objective, Content) {
+		Commands.Call("###Compile");
+		Commands.PrintInput(Objective, Content);
+		Commands.scrollDownToBottom();
+		Commands.ClearInput();
+		Contents = [Objective, Content];
+	}
+
+	Commands.GetContent = function(Objective, Content) {
+		return Contents;
+	}
+
+	Commands.Call = function(Code) {
+		PostMessage(Code);
 	}
 
 	return Commands;

@@ -82,7 +82,6 @@
 			}
 			// Command Certer
 			window.addEventListener("load", function () {
-				Commands.Show();
 				const scrollHeight = document.querySelector('.command-output').scrollHeight;
 				document.querySelector('.command-output').scrollTop = scrollHeight;
 			})
@@ -93,10 +92,7 @@
 				if (keyCode == '13'){
 					const content = $('#commandInput').val();
 					const objective = $('select').val();
-					Commands.PrintInput(objective, content);
-					const scrollHeight = document.querySelector('.command-output').scrollHeight;
-					document.querySelector('.command-output').scrollTop = scrollHeight;
-					document.querySelector('#commandInput').value = ''
+					Commands.SetContent(objective, content);
 				}
 			}
 		})();
