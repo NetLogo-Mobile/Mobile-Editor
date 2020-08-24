@@ -91,6 +91,9 @@
 				var keyCode = e.keyCode || e.which;
 				if (keyCode == '13'){
 					const content = $('#commandInput').val();
+					if (!content || Commands.Disabled) {
+						return
+					}
 					const objective = $('select').val();
 					Commands.SetContent(objective, content);
 				}

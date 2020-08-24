@@ -243,6 +243,7 @@ Commands = function() {
 	var Commands = {};
 
 	Contents = [];
+	Commands.Disabled = false;
 
 	// Hide MainEditor and Command Center would show up
 	Commands.Show = function() {
@@ -261,6 +262,7 @@ Commands = function() {
 	}
 
 	Commands.PrintOutput = function(Content) {
+		Commands.Disabled = false;
 		$('.command-output').append(`
 			<p class="Localized comment">${Content}</p>
 		`)
@@ -276,6 +278,7 @@ Commands = function() {
 	}
 
 	Commands.SetContent = function(Objective, Content) {
+		Commands.Disabled = true;
 		Commands.Call("###Compile");
 		Commands.PrintInput(Objective, Content);
 		Commands.scrollDownToBottom();
