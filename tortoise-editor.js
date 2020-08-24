@@ -261,6 +261,7 @@ Commands = function() {
 		`)
 	}
 
+	// Provide for Unity to print compiled output
 	Commands.PrintOutput = function(Content) {
 		Commands.Disabled = false;
 		$('.command-output').append(`
@@ -277,6 +278,7 @@ Commands = function() {
 		document.querySelector('.command-output').scrollTop = scrollHeight;
 	}
 
+	// Provide for Unity or `tutorial extention` to set command input
 	Commands.SetContent = function(Objective, Content) {
 		Commands.Disabled = true;
 		Commands.Call("###Compile");
@@ -286,6 +288,7 @@ Commands = function() {
 		Contents = [Objective, Content];
 	}
 
+	// Provide for Unity to get command input
 	Commands.GetContent = function(Objective, Content) {
 		return Contents;
 	}
