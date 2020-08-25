@@ -24,6 +24,15 @@
   color: #666;
 }
 
+.command-output .CompilationError,
+.command-output .RuntimeError {
+  color: #cc2200;
+}
+
+.command-output .Succeeded {
+  color: #007F69;
+}
+
 .command-line {
   bottom: 0;
   width: 100%;
