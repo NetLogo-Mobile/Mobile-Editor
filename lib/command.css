@@ -20,12 +20,8 @@
   line-height: 1.3rem;
 }
 
-.command-output .output {
+.command-output p.output {
   padding: 0 16px;
-}
-
-.command-output .Comment {
-  color: #666;
 }
 
 .command-wrapper {
@@ -57,8 +53,17 @@
   width: 100%;
 }
 
-.command-wrapper .input {
-  line-height: 1.3rem;
+.command-output .Comment {
+  color: #666;
+}
+
+.command-output .CompilationError,
+.command-output .RuntimeError {
+  color: #cc2200;
+}
+
+.command-output .Succeeded {
+  color: #007F69;
 }
 
 .command-line {

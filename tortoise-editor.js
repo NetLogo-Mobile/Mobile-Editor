@@ -309,7 +309,28 @@ Commands = function() {
 
 	// Provide for Unity to print compiled output
 	Commands.PrintOutput = function(Content, Class) {
-		Outputs.append(`<p class="output ${Class}">${Content}</p>`);
+		switch (Class) {
+			case "CompilationError":
+				Outputs.append(`<p class="CompilationError output">${Localized.Get("编译错误")}: ${Content}</p>`);
+				break;
+			case "RuntimeError":
+				Outputs.append(`<p class="RuntimeError output">${Localized.Get("执行错误")}: ${Content}</p>`);
+				break;
+			case "Succeeded":
+				Outputs.append(`<p class="Succeeded output">${Localized.Get("成功执行了命令。")}</p>`);
+				break;
+			case "Output":
+				var Last = Outputs.children().last();
+				if (Last.hasClass(Class)) {
+					Last.get(0).innerText += Content;
+				} else {
+					$(`<p class="Output output"></p>`).appendTo(Outputs).get(0).innerText = Content;
+				}
+				break;
+			default:
+				Outputs.append(`<p class="${Class} output">${Content}</p>`);
+				break;
+		}
 		Commands.ScrollToBottom();
 	}
 
@@ -349,8 +370,9 @@ Commands = function() {
 	}
 
 	// Provide for Unity to notify completion of the command
-	Commands.FinishExecution = function() {
-		Commands.Disabled = true;
+	Commands.FinishExecution = function(Status, Message) {
+		Commands.PrintOutput(Message, Status);
+		Commands.Disabled = false;
 	}
 
 	return Commands;
