@@ -20,6 +20,10 @@
   line-height: 1.3rem;
 }
 
+.command-output .output {
+  padding: 0 16px;
+}
+
 .command-output .Comment {
   color: #666;
 }
@@ -30,6 +34,17 @@
   flex-direction: row;
 }
 
+.command-wrapper.active {
+  background-color: #f7f7f7;
+}
+
+.command-wrapper .icon {
+  align-items: center;
+  width: 1rem;
+  padding: 0 16px;
+  display: none;
+}
+
 .comment-wrapper {
   padding: 0 16px;
 }
@@ -38,18 +53,11 @@
   flex: 1 auto;
 }
 
-.command-wrapper .icon {
-  align-items: center;
-  width: 1.25rem;
-  padding: 0 16px;
-  display: none;
-}
-
 .command-wrapper .icon img {
   width: 100%;
 }
 
-.command-wrapper .input, .command-wrapper .output {
+.command-wrapper .input {
   line-height: 1.3rem;
 }
 

@@ -309,13 +309,8 @@ Commands = function() {
 
 	// Provide for Unity to print compiled output
 	Commands.PrintOutput = function(Content, Class) {
-		Commands.Disabled = false;
-		const elements = document.querySelectorAll('.command-wrapper');
-		const length = elements.length;
-		const element = elements[length - 1];
-		element.children[0].insertAdjacentHTML("beforeend", `
-			<p class="output ${Class}">${Content}</p>
-		`);
+		Outputs.append(`<p class="output ${Class}">${Content}</p>`);
+		Commands.ScrollToBottom();
 	}
 
 	// Clear the input box of Command Center
