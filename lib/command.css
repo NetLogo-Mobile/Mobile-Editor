@@ -1,5 +1,6 @@
-/** The embedded page is running on quite modern browsers. It is not */
+/** The embedded page is running on quite modern browsers. It is not necessary to consider legacy browsers. */
 .command {
+  background: #FFF;
   width: 100%;
   height: 100%;
   font-size: 28px;

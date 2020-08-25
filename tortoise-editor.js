@@ -279,7 +279,7 @@ Commands = function() {
 				}
 			}
 		});
-		Commands.Show();
+		Commands.Hide();
 	}
 
 	Commands.PrintInput = function(Objective, Content) {
@@ -290,7 +290,6 @@ Commands = function() {
 
 	// Provide for Unity to print compiled output
 	Commands.PrintOutput = function(Content) {
-		Content = 
 		Commands.Disabled = false;
 		$('.command-output').append(`
 			<p class="Comment">${Content}</p>
