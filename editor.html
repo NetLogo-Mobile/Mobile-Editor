@@ -26,7 +26,7 @@
 					<option class="Localized" value="link">Link</option>
 					<option class="Localized" value="turtle">Turtle</option>
 				</select>
-				<input id="commandInput" type="text" autocorrect="off" autocapitalize="off">
+				<div id="commandInput"></div>
 			</div>
 		</div>
 		<div class="Overlays">
@@ -80,10 +80,12 @@
 					}
 				}
 			}
+
 			// Command Certer
 			window.addEventListener("load", function () {
 				const scrollHeight = document.querySelector('.command-output').scrollHeight;
 				document.querySelector('.command-output').scrollTop = scrollHeight;
+				Commands.Initialize();
 			})
 
 			document.getElementById('commandInput').onkeypress = function(e){

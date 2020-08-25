@@ -52,10 +52,15 @@
   appearance: none;
 }
 
-.command-line input {
-  flex: 1;
+.command-line #commandInput {
+  flex: 1 auto;
+  flex-grow: 1;
+  width: 42px; /* Arbitrary width */
+  height: 40px;
+}
+
+.command-line #commandInput .CodeMirror {
+  height: auto;
   border-radius: 6px;
-  border-style: none;
-  box-sizing: content-box;
   font-size: 24px;
 }

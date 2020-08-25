@@ -241,6 +241,7 @@ Localized = function() {
 // Commands: Handle the interaction of CodeMirror command center.
 Commands = function() {
 	var Commands = {};
+	var CommandEditor = null;
 
 	// Store [Objective, Input Content]
 	Contents = [];
@@ -257,9 +258,28 @@ Commands = function() {
 		$('#Main-Editor').css("display", "block");
 	}
 
+	Commands.Initialize = function() {
+		CommandEditor = CodeMirror(document.getElementById("commandInput"), {
+			mode: "netlogo",
+			theme: "netlogo-default",
+			scrollbarStyle: "null",
+			viewportMargin: Infinity,
+			extraKeys: {
+				Enter: function() {
+					const content = CommandEditor.getValue();
+					if (!content || Commands.Disabled) {
+						return
+					}
+					const objective = $('select').val();
+					Commands.SetContent(objective, content);
+				}
+			}
+		});
+	}
+
 	Commands.PrintInput = function(Objective, Content) {
 		$('.command-output').append(`
-			<p class="Localized comment">${Localized.Get(Objective)}> ${Content}</p>
+			<p class="Localized comment">${Objective}> ${Content}</p>
 		`)
 	}
 
@@ -273,7 +293,7 @@ Commands = function() {
 
 	// Clear the input box of Command Center
 	Commands.ClearInput = function() {
-		document.querySelector('#commandInput').value = '';
+		CommandEditor.getDoc().setValue("");
 	}
 
 	// After user entered input, screen view should scroll down to the botom line
