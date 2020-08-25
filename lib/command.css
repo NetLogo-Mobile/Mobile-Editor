@@ -11,7 +11,7 @@
 .command-output {
   width: 100%;
   height: 100%;
-  padding: 20px 16px 100px;
+  padding: 20px 0 100px;
   overflow: auto;
   box-sizing: border-box;
 }
@@ -22,6 +22,35 @@
 
 .command-output .Comment {
   color: #666;
+}
+
+.command-wrapper {
+  padding: 0 16px;
+  display: flex;
+  flex-direction: row;
+}
+
+.comment-wrapper {
+  padding: 0 16px;
+}
+
+.command-wrapper .content {
+  flex: 1 auto;
+}
+
+.command-wrapper .icon {
+  align-items: center;
+  width: 1.25rem;
+  padding: 0 16px;
+  display: none;
+}
+
+.command-wrapper .icon img {
+  width: 100%;
+}
+
+.command-wrapper .input, .command-wrapper .output {
+  line-height: 1.3rem;
 }
 
 .command-line {

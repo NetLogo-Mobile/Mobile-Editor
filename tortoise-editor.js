@@ -248,7 +248,7 @@ Commands = function() {
 
 	// Store [Objective, Input Content]
 	Contents = [];
-	
+
 	// Command center would be disabled before compile output come out.
 	Commands.Disabled = false;
 
@@ -290,20 +290,32 @@ Commands = function() {
 	// Print a line of input to the screen
 	Commands.PrintInput = function(Objective, Content) {
 		// CodeMirror Content
-		var Snippet = $(`<p class="Code">
-			${Localized.Get(Objective)}&gt; 
-			<span class="cm-s-netlogo-default"></span>
-		</p>`).appendTo(Outputs).children("span");
+		var Snippet = $(`
+			<div class="command-wrapper" onClick="onClickHandler(this)">
+				<div class="content">
+					<p class="input Code">${Localized.Get(Objective)}&gt;
+						<span class="cm-s-netlogo-default"></span>
+					</p>
+				</div>
+				<div class="icon" onClick="onClickCopy(this)">
+					<img class="copy-icon" src="images/copy.svg">
+				</div>
+			</div>
+		`).appendTo(Outputs).children(".content").children(".Code").children("span");
+
 		// Run CodeMirror
 		CodeMirror.runMode(Content, "netlogo", Snippet.get(0));
 	}
 
 	// Provide for Unity to print compiled output
 	Commands.PrintOutput = function(Content, Class) {
-		Outputs.append(`
-			<p class="${Class}">${Content}</p>
+		Commands.Disabled = false;
+		const elements = document.querySelectorAll('.command-wrapper');
+		const length = elements.length;
+		const element = elements[length - 1];
+		element.children[0].insertAdjacentHTML("beforeend", `
+			<p class="output ${Class}">${Content}</p>
 		`);
-		Commands.ScrollToBottom();
 	}
 
 	// Clear the input box of Command Center
@@ -329,6 +341,11 @@ Commands = function() {
 		Commands.ScrollToBottom();
 		Commands.ClearInput();
 		Contents = [Objective, Content];
+	}
+
+	Commands.setContent = function(Objective, Content) {
+			CommandEditor.getDoc().setValue(Content);
+			document.querySelector('select').value = Objective.toLowerCase();
 	}
 
 	// Provide for Unity to get command input
