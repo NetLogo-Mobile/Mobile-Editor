@@ -244,6 +244,7 @@ Localized = function() {
 Commands = function() {
 	var Commands = {};
 	var CommandEditor = null;
+	var Outputs = null;
 
 	// Store [Objective, Input Content]
 	Contents = [];
@@ -263,8 +264,13 @@ Commands = function() {
 		Commands.Container.css("display", "none");
 	}
 
+	// Initialize the command center
 	Commands.Initialize = function() {
+		// Get the elements
 		Commands.Container = $("#Command-Center");
+		Outputs = $(".command-output");
+		Commands.Hide();
+		// CodeMirror Editor
 		CommandEditor = CodeMirror(document.getElementById("Command-Input"), {
 			mode: "netlogo",
 			theme: "netlogo-default",
@@ -279,26 +285,35 @@ Commands = function() {
 				}
 			}
 		});
-		Commands.Hide();
 	}
 
+	// Print a line of input to the screen
 	Commands.PrintInput = function(Objective, Content) {
-		$('.command-output').append(`
-			<p class="Comment">${Localized.Get(Objective)}> ${Content}</p>
-		`)
+		// CodeMirror Content
+		var Snippet = $(`<p class="Code">
+			${Localized.Get(Objective)}&gt; 
+			<span class="cm-s-netlogo-default"></span>
+		</p>`).appendTo(Outputs).children("span");
+		// Run CodeMirror
+		CodeMirror.runMode(Content, "netlogo", Snippet.get(0));
 	}
 
 	// Provide for Unity to print compiled output
-	Commands.PrintOutput = function(Content) {
-		Commands.Disabled = false;
-		$('.command-output').append(`
-			<p class="Comment">${Content}</p>
-		`)
+	Commands.PrintOutput = function(Content, Class) {
+		Outputs.append(`
+			<p class="${Class}">${Content}</p>
+		`);
+		Commands.ScrollToBottom();
 	}
 
 	// Clear the input box of Command Center
 	Commands.ClearInput = function() {
 		CommandEditor.getDoc().setValue("");
+	}
+
+	// Clear the output region of Command Center
+	Commands.ClearOutput = function() {
+		Outputs.children(":not(.Keep)").remove();
 	}
 
 	// After user entered input, screen view should scroll down to the botom line
@@ -309,7 +324,6 @@ Commands = function() {
 
 	// Execute a command from the user
 	Commands.Execute = function(Objective, Content) {
-		Commands.Disabled = true;
 		Editor.Call("###Execute");
 		Commands.PrintInput(Objective, Content);
 		Commands.ScrollToBottom();
@@ -318,8 +332,14 @@ Commands = function() {
 	}
 
 	// Provide for Unity to get command input
-	Commands.GetContent = function() {
+	Commands.GetCommand = function() {
 		return JSON.stringify(Contents);
 	}
+
+	// Provide for Unity to notify completion of the command
+	Commands.FinishExecution = function() {
+		Commands.Disabled = true;
+	}
+
 	return Commands;
 }();
