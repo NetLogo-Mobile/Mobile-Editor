@@ -4,7 +4,7 @@
 	<link rel="stylesheet" href="lib/codemirror.css">
 	<link rel="stylesheet" href="addon/hint/show-hint.css">
 	<link rel="stylesheet" href="lib/netlogo.css">
-	<link rel="stylesheet" href="css/command.css">
+	<link rel="stylesheet" href="lib/command.css">
 	<meta charset="UTF-8" />
 	<script src="lib/codemirror.js"></script>
 	<script src="addon/mode/simple.js"></script>
@@ -13,31 +13,26 @@
 	<script src="lib/netlogo.js"></script>
 </head>
 <body>
-	<div class="command">
+	<div id="Command-Center" class="command">
 		<div class="command-output">
-			<p class="Localized comment">;; Instructions</p>
-			<p class="Localized comment">;; Firstly, choose an object</p>
+			<p class="Localized comment">;; 在这里执行 NetLogo 命令来影响模型状态</p>
+			<p class="Localized comment">;; 首先，你需要选择执行命令的主语：观察者，所有海龟 (Turtles)、所有瓦片 (Patches) 还是所有链接 (Links)？</p>
+			<p class="Localized comment">;; 例如将模型的背景改为黑色，你可以让观察者执行 ask patches [ set pcolor white ]</p>
 		</div>
 		<div class="command-line">
 			<div class="wrapper">
-				<select name="objectives" id="objectives">
-					<option class="Localized" value="observer">Observer</option>
-					<option class="Localized" value="patches">Patches</option>
-					<option class="Localized" value="link">Link</option>
-					<option class="Localized" value="turtle">Turtle</option>
+				<select name="objectives" id="Command-Objective">
+					<option class="Localized" value="observer">观察者 (Observer)</option>
+					<option class="Localized" value="turtles">所有海龟 (Turtles)</option>
+					<option class="Localized" value="patches">所有瓦片 (Patches)</option>
+					<option class="Localized" value="links">所有链接 (Links)</option>
 				</select>
-				<div id="commandInput"></div>
-			</div>
-		</div>
-		<div class="Overlays">
-			<div id="Rotate-Screen" class="Backdrop">
-				<img src="images/rotate.svg" />
-				<p class="Localized">编辑器支持竖屏使用。旋转屏幕获得最佳体验！</p>
+				<div id="Command-Input"></div>
 			</div>
 		</div>
 	</div>
 	<div id="Main-Editor">
-		<div id="Main-Tips">Click to apply the changes on your model.</div>
+		<div id="Main-Tips"></div>
 		<div id="Main-CodeMirror"></div>
 		<div class="Overlays">
 			<div id="Rotate-Screen" class="Backdrop">
@@ -46,7 +41,7 @@
 			</div>
 		</div>
 	</div>
-		<script type="text/javascript">
+	<script type="text/javascript">
 		(function() {
 			// Script loader
 			window.LoadScript = function (Name) {
@@ -60,6 +55,7 @@
 			// Load event
 			window.addEventListener("load", function () {
 				Editor.Initialize();
+				Commands.Initialize();
 				PostMessage(navigator.userAgent);
 			})
 			// Messenger
@@ -81,25 +77,11 @@
 				}
 			}
 
-			// Command Certer
+			// Command Center
 			window.addEventListener("load", function () {
 				const scrollHeight = document.querySelector('.command-output').scrollHeight;
 				document.querySelector('.command-output').scrollTop = scrollHeight;
-				Commands.Initialize();
 			})
-
-			document.getElementById('commandInput').onkeypress = function(e){
-				if (!e) e = window.event;
-				var keyCode = e.keyCode || e.which;
-				if (keyCode == '13'){
-					const content = $('#commandInput').val();
-					if (!content || Commands.Disabled) {
-						return
-					}
-					const objective = $('select').val();
-					Commands.SetContent(objective, content);
-				}
-			}
 		})();
 	</script>
 </body>

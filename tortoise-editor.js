@@ -129,6 +129,7 @@ Editor = function() {
 
 	// Initialize the editor.
 	Editor.Initialize = function() {
+		Editor.Container = $("#Main-Editor");
 		// Basic initialization
 		MainEditor = CodeMirror(document.getElementById("Main-CodeMirror"), {
 			lineNumbers: true,
@@ -231,7 +232,8 @@ Localized = function() {
 
 	// Get: Get localized string.
 	Localized.Get = function(Source) {
-		if (Localized.Data.hasOwnProperty(Source)) return Localized.Data[Source];
+		if (Localized.Data && Localized.Data.hasOwnProperty(Source))
+		 return Localized.Data[Source];
 		return Source;
 	}
 
@@ -245,21 +247,25 @@ Commands = function() {
 
 	// Store [Objective, Input Content]
 	Contents = [];
+	
 	// Command center would be disabled before compile output come out.
 	Commands.Disabled = false;
 
 	// Hide MainEditor and Command Center would show up
 	Commands.Show = function() {
-		$('#Main-Editor').css("display", "none");
+		Editor.Container.css("display", "none");
+		Commands.Container.css("display", "block");
 	}
 
 	// Hide Command Center and MainEditor would show up
 	Commands.Hide = function() {
-		$('#Main-Editor').css("display", "block");
+		Editor.Container.css("display", "block");
+		Commands.Container.css("display", "none");
 	}
 
 	Commands.Initialize = function() {
-		CommandEditor = CodeMirror(document.getElementById("commandInput"), {
+		Commands.Container = $("#Command-Center");
+		CommandEditor = CodeMirror(document.getElementById("Command-Input"), {
 			mode: "netlogo",
 			theme: "netlogo-default",
 			scrollbarStyle: "null",
@@ -267,27 +273,27 @@ Commands = function() {
 			extraKeys: {
 				Enter: function() {
 					const content = CommandEditor.getValue();
-					if (!content || Commands.Disabled) {
-						return
-					}
-					const objective = $('select').val();
-					Commands.SetContent(objective, content);
+					if (!content || Commands.Disabled) return;
+					const objective = $('#Command-Objective').val();
+					Commands.Execute(objective, content);
 				}
 			}
 		});
+		Commands.Show();
 	}
 
 	Commands.PrintInput = function(Objective, Content) {
 		$('.command-output').append(`
-			<p class="Localized comment">${Objective}> ${Content}</p>
+			<p class="Comment">${Localized.Get(Objective)}> ${Content}</p>
 		`)
 	}
 
 	// Provide for Unity to print compiled output
 	Commands.PrintOutput = function(Content) {
+		Content = 
 		Commands.Disabled = false;
 		$('.command-output').append(`
-			<p class="Localized comment">${Content}</p>
+			<p class="Comment">${Content}</p>
 		`)
 	}
 
@@ -297,30 +303,24 @@ Commands = function() {
 	}
 
 	// After user entered input, screen view should scroll down to the botom line
-	Commands.scrollDownToBottom = function() {
+	Commands.ScrollToBottom = function() {
 		const scrollHeight = document.querySelector('.command-output').scrollHeight;
 		document.querySelector('.command-output').scrollTop = scrollHeight;
 	}
 
-	// Provide for Unity or `tutorial extention` to set command input
-	Commands.SetContent = function(Objective, Content) {
+	// Execute a command from the user
+	Commands.Execute = function(Objective, Content) {
 		Commands.Disabled = true;
-		Commands.Call("###Compile");
+		Editor.Call("###Execute");
 		Commands.PrintInput(Objective, Content);
-		Commands.scrollDownToBottom();
+		Commands.ScrollToBottom();
 		Commands.ClearInput();
 		Contents = [Objective, Content];
 	}
 
 	// Provide for Unity to get command input
-	Commands.GetContent = function(Objective, Content) {
-		return Contents;
+	Commands.GetContent = function() {
+		return JSON.stringify(Contents);
 	}
-
-	// Call the unity engine to compile the command
-	Commands.Call = function(Code) {
-		PostMessage(Code);
-	}
-
 	return Commands;
 }();
