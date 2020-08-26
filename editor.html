@@ -11,34 +11,37 @@
 	<script src="addon/runmode/runmode.js"></script>
 	<script src="addon/hint/show-hint.js"></script>
 	<script src="lib/zepto.min.js"></script>
+	<script src="lib/scrolllock.js"></script>
 	<script src="lib/netlogo.js"></script>
 </head>
 <body>
-	<div id="Command-Center" class="command">
-		<div class="command-output">
-			<p class="Comment Keep">;; <span class="Localized">在这里执行 NetLogo 命令来影响模型状态</span></p>
-			<p class="Comment Keep">;; <span class="Localized">例如将模型的背景改为黑色，你可以让观察者执行</span> ask patches [ set pcolor white ]</p>
-			<p class="Comment Keep">;; <span class="Localized">不同的主语会带来不同的效果。试试让所有海龟执行</span> `set color white`</p>
-		</div>
-		<div class="command-line">
-			<div class="wrapper">
-				<select name="objectives" id="Command-Objective">
-					<option class="Localized" value="observer">观察者 (Observer)</option>
-					<option class="Localized" value="turtles">所有海龟 (Turtles)</option>
-					<option class="Localized" value="patches">所有瓦片 (Patches)</option>
-					<option class="Localized" value="links">所有链接 (Links)</option>
-				</select>
-				<div id="Command-Input"></div>
+	<div id="Container">
+		<div id="Command-Center" class="command">
+			<div class="command-output">
+				<p class="Comment output Keep">;; <span class="Localized">在这里执行 NetLogo 命令来影响模型状态</span></p>
+				<p class="Comment output Keep">;; <span class="Localized">例如将模型的背景改为黑色，你可以让观察者执行</span> ask patches [ set pcolor white ]</p>
+				<p class="Comment output Keep">;; <span class="Localized">不同的主语会带来不同的效果。试试让所有海龟执行</span> `set color white`</p>
+			</div>
+			<div id="Command-Line" class="command-line">
+				<div class="wrapper">
+					<select name="objectives" id="Command-Objective">
+						<option class="Localized" value="observer">观察者 (Observer)</option>
+						<option class="Localized" value="turtles">所有海龟 (Turtles)</option>
+						<option class="Localized" value="patches">所有瓦片 (Patches)</option>
+						<option class="Localized" value="links">所有链接 (Links)</option>
+					</select>
+					<div id="Command-Input"></div>
+				</div>
 			</div>
 		</div>
-	</div>
-	<div id="Main-Editor">
-		<div id="Main-Tips"></div>
-		<div id="Main-CodeMirror"></div>
-		<div class="Overlays">
-			<div id="Rotate-Screen" class="Backdrop">
-				<img src="images/rotate.svg" />
-				<p class="Localized">编辑器支持竖屏使用。旋转屏幕获得最佳体验！</p>
+		<div id="Main-Editor">
+			<div id="Main-Tips"></div>
+			<div id="Main-CodeMirror"></div>
+			<div class="Overlays">
+				<div id="Rotate-Screen" class="Backdrop">
+					<img src="images/rotate.svg" />
+					<p class="Localized">编辑器支持竖屏使用。旋转屏幕获得最佳体验！</p>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -84,19 +87,11 @@
 				document.querySelector('.command-output').scrollTop = scrollHeight;
 			});
 
-			window.onClickHandler = function(element) {
-				$(".command-wrapper").removeClass("active");
-				$(".command-wrapper .icon").css("display", "none");
-				const wrapper = element;
-				wrapper.classList.add("active");
-				wrapper.children[1].style.display = "flex";
-			}
-
 			window.onClickCopy = function(element) {
 				const wrapper = element.parentElement;
 				const input = wrapper.children[0].children[0].innerText;
 				const [objective, command] = input.split("> ");
-				Commands.setContent(objective, command);
+				Commands.SetContent(objective, command);
 			}
 		})();
 	</script>

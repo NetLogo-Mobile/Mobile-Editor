@@ -256,12 +256,16 @@ Commands = function() {
 	Commands.Show = function() {
 		Editor.Container.css("display", "none");
 		Commands.Container.css("display", "block");
+		bodyScrollLock.clearAllBodyScrollLocks();
+		bodyScrollLock.disableBodyScroll(document.querySelector('div.command-output'));
 	}
 
 	// Hide Command Center and MainEditor would show up
 	Commands.Hide = function() {
 		Editor.Container.css("display", "block");
 		Commands.Container.css("display", "none");
+		bodyScrollLock.clearAllBodyScrollLocks();
+		bodyScrollLock.disableBodyScroll(document.querySelector('.CodeMirror-scroll'), { allowTouchMove: () => true });
 	}
 
 	// Initialize the command center
@@ -285,25 +289,49 @@ Commands = function() {
 				}
 			}
 		});
+		// Listen to the sizing
+		if (window.visualViewport)
+			window.visualViewport.addEventListener("resize", () => {
+				var Height = window.visualViewport.height;
+				var Offset = window.innerHeight - Height;
+				$("#Container").css("height", `${Height}px`);
+				$("#Command-Line").css("bottom", `${Offset}px`);
+			});
 	}
 
 	// Print a line of input to the screen
 	Commands.PrintInput = function(Objective, Content) {
 		// CodeMirror Content
-		var Snippet = $(`
-			<div class="command-wrapper" onClick="onClickHandler(this)">
+		var Wrapper = $(`
+			<div class="command-wrapper">
 				<div class="content">
 					<p class="input Code">${Localized.Get(Objective)}&gt;
 						<span class="cm-s-netlogo-default"></span>
 					</p>
 				</div>
-				<div class="icon" onClick="onClickCopy(this)">
+				<div class="icon">
 					<img class="copy-icon" src="images/copy.svg">
 				</div>
 			</div>
-		`).appendTo(Outputs).children(".content").children(".Code").children("span");
+		`).appendTo(Outputs);
 
+		// Click to activate
+		Wrapper.on("click", () => {
+			$(".command-wrapper").removeClass("active");
+			$(".command-wrapper .icon").css("display", "none");
+			Wrapper.addClass("active");
+			Wrapper.children(".icon").get(0).style.display = "flex";
+		});
+
+		// Click to copy
+		Wrapper.children(".icon").on("click", () => {
+			const input = Wrapper.find("p.input").get(0).innerText;
+			const [objective, command] = input.split("> ");
+			Commands.SetContent(objective, command);
+		});
+		
 		// Run CodeMirror
+		var Snippet = Wrapper.children(".content").children(".Code").children("span");
 		CodeMirror.runMode(Content, "netlogo", Snippet.get(0));
 	}
 
@@ -359,9 +387,10 @@ Commands = function() {
 		Contents = [Objective, Content];
 	}
 
-	Commands.setContent = function(Objective, Content) {
-			CommandEditor.getDoc().setValue(Content);
-			document.querySelector('select').value = Objective.toLowerCase();
+	// Set the content of command input
+	Commands.SetContent = function(Objective, Content) {
+		CommandEditor.getDoc().setValue(Content);
+		document.querySelector('select').value = Objective.toLowerCase();
 	}
 
 	// Provide for Unity to get command input
