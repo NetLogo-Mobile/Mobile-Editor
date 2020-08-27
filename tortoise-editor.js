@@ -245,6 +245,8 @@ Commands = function() {
 	var Commands = {};
 	var CommandEditor = null;
 	var Outputs = null;
+	var CommandStack = [];
+	var CurrentCommandIndex = 0;
 
 	// Store [Objective, Input Content]
 	Contents = [];
@@ -280,15 +282,39 @@ Commands = function() {
 			theme: "netlogo-default",
 			scrollbarStyle: "null",
 			viewportMargin: Infinity,
+			cursorHeight: 0.8,
 			extraKeys: {
 				Enter: function() {
 					const content = CommandEditor.getValue();
 					if (!content || Commands.Disabled) return;
 					const objective = $('#Command-Objective').val();
 					Commands.Execute(objective, content);
+					CommandStack.push([objective, content]);
+					CurrentCommandIndex = 0;
+				},
+				Up: function() {
+					// Get previous command from command history
+					if (CurrentCommandIndex >= CommandStack.length) return;
+					CurrentCommandIndex += 1;
+					const index = CommandStack.length - CurrentCommandIndex;
+					Commands.SetContent(CommandStack[index][0], CommandStack[index][1]);
+					CommandEditor.setCursor(CommandEditor.lineCount(), 0);
+				},
+				Down: function() {
+					// Get next command from command history
+					if (CurrentCommandIndex <= 1) {
+						Commands.ClearInput();
+						CurrentCommandIndex = 0;
+						return;
+					}
+					CurrentCommandIndex -= 1;
+					const index = CommandStack.length - CurrentCommandIndex;
+					Commands.SetContent(CommandStack[index][0], CommandStack[index][1]);
+					CommandEditor.setCursor(CommandEditor.lineCount(), 0);
 				}
 			}
 		});
+
 		// Listen to the sizing
 		if (window.visualViewport)
 			window.visualViewport.addEventListener("resize", () => {
@@ -329,7 +355,7 @@ Commands = function() {
 			const [objective, command] = input.split("> ");
 			Commands.SetContent(objective, command);
 		});
-		
+
 		// Run CodeMirror
 		var Snippet = Wrapper.children(".content").children(".Code").children("span");
 		CodeMirror.runMode(Content, "netlogo", Snippet.get(0));
