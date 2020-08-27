@@ -3,12 +3,12 @@
   background: #FFF;
   width: 100%;
   height: 100%;
-  font-size: 28px;
+  font-size: 30px;
 }
 
 .command-output {
   width: 100%;
-  height: calc(100% - 80px);
+  height: calc(100% - 2.7rem);
   padding: 20px 0;
   overflow: auto;
   box-sizing: border-box;
@@ -19,11 +19,11 @@
 }
 
 .command-output p.output {
-  padding: 0 16px;
+  padding: 0 0.9rem;
 }
 
 .command-wrapper {
-  padding: 0 16px;
+  padding: 0 0.9rem;
   display: flex;
   flex-direction: row;
 }
@@ -37,10 +37,6 @@
   width: 1rem;
   padding: 0 16px;
   display: none;
-}
-
-.comment-wrapper {
-  padding: 0 16px;
 }
 
 .command-wrapper .content {
@@ -67,29 +63,30 @@
 .command-line {
   bottom: 0;
   width: 100%;
-  height: 80px;
+  height: 2.7rem;
   display: flex;
   position: fixed;
   align-items: center;
   border-top: 1px solid #eee;
   background-color: #f2f2f2;
+  padding-bottom: 0.8rem;
 }
 
 .command-line .wrapper {
   width: 100%;
   display: flex;
-  padding: 0 16px;
+  padding: 0 0.9rem;
 }
 
 .command-line select {
   background-color: #2F80ED;
   border-radius: 6px;
   color: #fff;
-  padding: 8px 12px;
-  font-size: 28px;
+  padding: 0.3rem 0.5rem;
+  font-size: 30px;
   line-height: 36px;
   border: none;
-  margin-right: 8px;
+  margin-right: 0.7rem;
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
@@ -105,6 +102,6 @@
 .command-line #Command-Input .CodeMirror {
   height: auto;
   border-radius: 6px;
-  font-size: 28px;
+  font-size: 30px;
   line-height: 52px;
 }
