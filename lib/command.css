@@ -9,7 +9,7 @@
 .command-output {
   width: 100%;
   height: calc(100% - 2.7rem);
-  padding: 20px 0;
+  padding-top: 1rem;
   overflow: auto;
   box-sizing: border-box;
 }
@@ -19,11 +19,11 @@
 }
 
 .command-output p.output {
-  padding: 0 0.9rem;
+  padding: 0 1rem;
 }
 
 .command-wrapper {
-  padding: 0 0.9rem;
+  padding: 0 1rem;
   display: flex;
   flex-direction: row;
 }
@@ -69,22 +69,22 @@
   align-items: center;
   border-top: 1px solid #eee;
   background-color: #f2f2f2;
-  padding-bottom: 0.8rem;
+  padding-bottom: 1rem;
 }
 
 .command-line .wrapper {
   width: 100%;
   display: flex;
-  padding: 0 0.9rem;
+  padding: 0 1rem;
 }
 
 .command-line select {
   background-color: #2F80ED;
-  border-radius: 6px;
+  border-radius: 0.24rem;
   color: #fff;
-  padding: 0.3rem 0.5rem;
+  padding: 0.5rem 0.7rem;
   font-size: 30px;
-  line-height: 36px;
+  line-height: 1rem;
   border: none;
   margin-right: 0.7rem;
   -webkit-appearance: none;
@@ -96,12 +96,12 @@
   flex: 1 auto;
   flex-grow: 1;
   width: 42px; /* Arbitrary width */
-  height: 52px;
+  height: 2rem;
 }
 
 .command-line #Command-Input .CodeMirror {
   height: auto;
-  border-radius: 6px;
+  border-radius: 0.24rem;
   font-size: 30px;
   line-height: 52px;
 }
