@@ -245,7 +245,10 @@ Commands = function() {
 	var Commands = {};
 	var CommandEditor = null;
 	var Outputs = null;
+
+	// Following three variables are used for command histrory.
 	var CommandStack = [];
+	var CurrentCommand = [];
 	var CurrentCommandIndex = 0;
 
 	// Store [Objective, Input Content]
@@ -282,36 +285,60 @@ Commands = function() {
 			theme: "netlogo-default",
 			scrollbarStyle: "null",
 			viewportMargin: Infinity,
-			cursorHeight: 0.8,
-			extraKeys: {
-				Enter: function() {
-					const content = CommandEditor.getValue();
-					if (!content || Commands.Disabled) return;
-					const objective = $('#Command-Objective').val();
-					Commands.Execute(objective, content);
-					CommandStack.push([objective, content]);
+			cursorHeight: 0.8
+		});
+
+		CommandEditor.on('keyup', (cm, event) => {
+			const key = event.key;
+			if (key !== "Enter" && key !== "ArrowUp" && key !== "ArrowDown" && CurrentCommandIndex == 0) {
+				const content = CommandEditor.getValue();
+				const objective = $('#Command-Objective').val();
+				CurrentCommand = [objective, content];
+				CurrentCommandIndex = 0;
+			}
+		});
+
+		// After press key `Enter`, excute command
+		CommandEditor.on('keydown', (cm, event) => {
+			if (event.key == "Enter") {
+				const content = CommandEditor.getValue();
+				if (!content || Commands.Disabled) return;
+				const objective = $('#Command-Objective').val();
+				Commands.Execute(objective, content);
+				CommandStack.push([objective, content]);
+				CurrentCommandIndex = 0;
+				CurrentCommand = [];
+			}
+		});
+
+		// After press key `ArrowUp`, get previous command from command history
+		CommandEditor.on('keydown', (cm, event) => {
+			if (event.key == "ArrowUp") {
+				if (CurrentCommandIndex >= CommandStack.length) return;
+				CurrentCommandIndex += 1;
+				const index = CommandStack.length - CurrentCommandIndex;
+				Commands.SetContent(CommandStack[index][0], CommandStack[index][1]);
+				CommandEditor.setCursor(CommandEditor.lineCount(), 0);
+			}
+		});
+
+		// After press key `ArrowDown`, get next command from command history
+		CommandEditor.on('keydown', (cm, event) => {
+			if (event.key == "ArrowDown") {
+				if (CurrentCommandIndex <= 1) {
 					CurrentCommandIndex = 0;
-				},
-				Up: function() {
-					// Get previous command from command history
-					if (CurrentCommandIndex >= CommandStack.length) return;
-					CurrentCommandIndex += 1;
-					const index = CommandStack.length - CurrentCommandIndex;
-					Commands.SetContent(CommandStack[index][0], CommandStack[index][1]);
-					CommandEditor.setCursor(CommandEditor.lineCount(), 0);
-				},
-				Down: function() {
-					// Get next command from command history
-					if (CurrentCommandIndex <= 1) {
+					if (CurrentCommand.length == 0) {
 						Commands.ClearInput();
-						CurrentCommandIndex = 0;
-						return;
+					} else {
+						Commands.SetContent(CurrentCommand[0], CurrentCommand[1]);
+						CommandEditor.setCursor(CommandEditor.lineCount(), 0);
 					}
-					CurrentCommandIndex -= 1;
-					const index = CommandStack.length - CurrentCommandIndex;
-					Commands.SetContent(CommandStack[index][0], CommandStack[index][1]);
-					CommandEditor.setCursor(CommandEditor.lineCount(), 0);
+					return;
 				}
+				CurrentCommandIndex -= 1;
+				const index = CommandStack.length - CurrentCommandIndex;
+				Commands.SetContent(CommandStack[index][0], CommandStack[index][1]);
+				CommandEditor.setCursor(CommandEditor.lineCount(), 0);
 			}
 		});
 
