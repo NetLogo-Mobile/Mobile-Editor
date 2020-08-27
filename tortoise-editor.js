@@ -289,7 +289,7 @@ Commands = function() {
 		});
 
 		CommandEditor.on('keyup', (cm, event) => {
-			const key = event.key;
+			const key = event.code;
 			if (key !== "Enter" && key !== "ArrowUp" && key !== "ArrowDown" && CurrentCommandIndex == 0) {
 				const content = CommandEditor.getValue();
 				const objective = $('#Command-Objective').val();
@@ -299,9 +299,9 @@ Commands = function() {
 		});
 
 		// After press key `Enter`, excute command
-		CommandEditor.on('keydown', (cm, event) => {
+		CommandEditor.on('keyup', (cm, event) => {
 			if (event.key == "Enter") {
-				const content = CommandEditor.getValue();
+				const content = CommandEditor.getValue().replace(/\n/ig, '');
 				if (!content || Commands.Disabled) return;
 				const objective = $('#Command-Objective').val();
 				Commands.Execute(objective, content);
@@ -313,7 +313,7 @@ Commands = function() {
 
 		// After press key `ArrowUp`, get previous command from command history
 		CommandEditor.on('keydown', (cm, event) => {
-			if (event.key == "ArrowUp") {
+			if (event.key == "ArrowUp" || event.code == "ArrowUp") {
 				if (CurrentCommandIndex >= CommandStack.length) return;
 				CurrentCommandIndex += 1;
 				const index = CommandStack.length - CurrentCommandIndex;
@@ -324,7 +324,7 @@ Commands = function() {
 
 		// After press key `ArrowDown`, get next command from command history
 		CommandEditor.on('keydown', (cm, event) => {
-			if (event.key == "ArrowDown") {
+			if (event.key == "ArrowDown"|| event.code == "ArrowDown") {
 				if (CurrentCommandIndex <= 1) {
 					CurrentCommandIndex = 0;
 					if (CurrentCommand.length == 0) {
@@ -335,10 +335,10 @@ Commands = function() {
 					}
 					return;
 				}
-				CurrentCommandIndex -= 1;
 				const index = CommandStack.length - CurrentCommandIndex;
 				Commands.SetContent(CommandStack[index][0], CommandStack[index][1]);
 				CommandEditor.setCursor(CommandEditor.lineCount(), 0);
+				CurrentCommandIndex -= 1;
 			}
 		});
 
