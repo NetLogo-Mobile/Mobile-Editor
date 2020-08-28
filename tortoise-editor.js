@@ -390,28 +390,50 @@ Commands = function() {
 
 	// Provide for Unity to print compiled output
 	Commands.PrintOutput = function(Content, Class) {
+		var Output;
 		switch (Class) {
 			case "CompilationError":
-				Outputs.append(`<p class="CompilationError output">${Localized.Get("编译错误")}: ${Content}</p>`);
+				Output = $(`
+					<p class="CompilationError output">${Localized.Get("编译错误")}: ${Content}</p>
+				`).appendTo(Outputs);
 				break;
 			case "RuntimeError":
-				Outputs.append(`<p class="RuntimeError output">${Localized.Get("执行错误")}: ${Content}</p>`);
+				Output = $(`
+					<p class="RuntimeError output">${Localized.Get("执行错误")}: ${Content}</p>
+				`).appendTo(Outputs);
 				break;
 			case "Succeeded":
-				Outputs.append(`<p class="Succeeded output">${Localized.Get("成功执行了命令。")}</p>`);
+				Output = $(`
+					<p class="Succeeded output">${Localized.Get("成功执行了命令。")}</p>
+				`).appendTo(Outputs);
 				break;
 			case "Output":
 				var Last = Outputs.children().last();
 				if (Last.hasClass(Class)) {
+					Output = Last;
 					Last.get(0).innerText += Content;
 				} else {
-					$(`<p class="Output output"></p>`).appendTo(Outputs).get(0).innerText = Content;
+					Output = $(`<p class="Output output"></p>`).appendTo(Outputs);
+					Output.get(0).innerText = Content;
 				}
 				break;
 			default:
-				Outputs.append(`<p class="${Class} output">${Content}</p>`);
+				var Output = $(`
+					<p class="${Class} output">${Content}</p>
+				`).appendTo(Outputs);
 				break;
 		}
+
+		Output.on("click", (event) => {
+			previousNode = event.path[0].previousElementSibling;
+			if (previousNode.className == "command-wrapper") {
+				$(".command-wrapper").removeClass("active");
+				$(".command-wrapper .icon").css("display", "none");
+				previousNode.className += " active";
+				previousNode.children[1].style.display = "flex";
+			}
+		});
+
 		Commands.ScrollToBottom();
 	}
 
