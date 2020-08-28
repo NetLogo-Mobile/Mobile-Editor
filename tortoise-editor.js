@@ -263,6 +263,7 @@ Commands = function() {
 		Commands.Container.css("display", "block");
 		bodyScrollLock.clearAllBodyScrollLocks();
 		bodyScrollLock.disableBodyScroll(document.querySelector('div.command-output'));
+		CommandEditor.refresh();
 	}
 
 	// Hide Command Center and MainEditor would show up
