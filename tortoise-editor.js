@@ -299,8 +299,8 @@ Commands = function() {
 		});
 
 		// After press key `Enter`, excute command
-		CommandEditor.on('keyup', (cm, event) => {
-			if (event.key == "Enter") {
+		CommandEditor.on('keydown', (cm, event) => {
+			if (event.key == "Enter" || event.code == "Enter") {
 				const content = CommandEditor.getValue().replace(/\n/ig, '');
 				if (!content || Commands.Disabled) return;
 				const objective = $('#Command-Objective').val();

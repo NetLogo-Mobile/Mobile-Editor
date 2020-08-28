@@ -86,13 +86,6 @@
 				const scrollHeight = document.querySelector('.command-output').scrollHeight;
 				document.querySelector('.command-output').scrollTop = scrollHeight;
 			});
-
-			window.onClickCopy = function(element) {
-				const wrapper = element.parentElement;
-				const input = wrapper.children[0].children[0].innerText;
-				const [objective, command] = input.split("> ");
-				Commands.SetContent(objective, command);
-			}
 		})();
 	</script>
 </body>
