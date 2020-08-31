@@ -9,13 +9,13 @@
 .command-output {
   width: 100%;
   height: calc(100% - 3.7rem);
-  padding-top: 1rem;
+  padding-top: 0.5rem;
   overflow: auto;
   box-sizing: border-box;
 }
 
 .command-output p {
-  line-height: 1.3rem;
+  line-height: 1.5rem;
 }
 
 .command-output p.output {
@@ -66,10 +66,10 @@
   height: 2.7rem;
   display: flex;
   position: fixed;
+  padding-bottom: env(safe-area-inset-bottom);
   align-items: center;
   border-top: 1px solid #eee;
   background-color: #f2f2f2;
-  padding-bottom: 1rem;
 }
 
 .command-line .wrapper {
