@@ -12,10 +12,15 @@
   padding-top: 0.5rem;
   overflow: auto;
   box-sizing: border-box;
+  line-height: 1.5rem;
 }
 
-.command-output p {
-  line-height: 1.5rem;
+.command-output a {
+  color: #216BBF;
+}
+
+.command-output div.block {
+  background: #F5F5F5;
 }
 
 .command-output p.output {

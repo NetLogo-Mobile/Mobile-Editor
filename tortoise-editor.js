@@ -429,9 +429,11 @@ Commands = function() {
 					`).appendTo(Outputs);
 				} else {
 					Output = $(`
-						<p class="${Class} output"><code>${Content["display_name"]}</code> (<a href="javascript:void(0)" onclick="Commands.ReadMore('${Content["display_name"]}')">${Localized.Get("阅读全文")}</a>)</p>
-						<p class="${Class} output">${Content["short_description"].capitalize()}</p>
-						<p class="${Class} output">${Localized.Get("参见")}: ${Content["see_also"].map((Name) => Commands.LinkCommand(null, `help ${Name}`, Name)).join(", ")}</p>
+						<div class="block">
+							<p class="${Class} output"><code>${Content["display_name"]}</code> (<a href="javascript:void(0)" onclick="Commands.ReadMore('${Content["display_name"]}')">${Localized.Get("阅读全文")}</a>)</p>
+							<p class="${Class} output">${Content["short_description"].capitalize()}</p>
+							<p class="${Class} output">${Localized.Get("参见")}: ${Content["see_also"].map((Name) => Commands.LinkCommand(null, `help ${Name}`, Name)).join(", ")}</p>
+						</div>
 					`).appendTo(Outputs);
 				}
 				Commands.Annotate(Output.find("code").addClass("cm-s-netlogo-default"));
