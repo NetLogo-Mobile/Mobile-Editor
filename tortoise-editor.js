@@ -30,6 +30,7 @@ Editor = function() {
 		Item.ScrollIntoView();
 		Highlights.push(Item);
 	}
+
 	// ClearHighlights: Clear all highlights.
 	var Highlights = [];
 	Editor.ClearHighlights = function() {
@@ -97,7 +98,7 @@ Editor = function() {
 		// Mark clean or show tips
 		if (!Unapplied) Editor.SetApplied();
 		// Event listener
-		MainEditor.on("changes", () => Editor.Call("###Unapplied"));
+		MainEditor.on("changes", () => Editor.Call({ Type: "CodeChanged" }));
 	}
 
 	// GetContent: Get the content of the editor.
@@ -201,7 +202,7 @@ Editor = function() {
 
 	// Call: Call the Unity engine.
 	Editor.Call = function(Code) {
-		PostMessage(Code);
+		PostMessage(JSON.stringify(Code));
 	}
 
 	return Editor;
@@ -305,6 +306,7 @@ Commands = function() {
 				const content = CommandEditor.getValue().replace(/\n/ig, '');
 				if (!content || Commands.Disabled) return;
 				const objective = $('#Command-Objective').val();
+				Commands.Disabled = true;
 				Commands.Execute(objective, content);
 				CommandStack.push([objective, content]);
 				CurrentCommandIndex = 0;
@@ -355,6 +357,8 @@ Commands = function() {
 
 	// Print a line of input to the screen
 	Commands.PrintInput = function(Objective, Content) {
+		if (Objective == null) Objective = $('#Command-Objective').val();
+
 		// CodeMirror Content
 		var Wrapper = $(`
 			<div class="command-wrapper">
@@ -385,8 +389,7 @@ Commands = function() {
 		});
 
 		// Run CodeMirror
-		var Snippet = Wrapper.children(".content").children(".Code").children("span");
-		CodeMirror.runMode(Content, "netlogo", Snippet.get(0));
+		Commands.Annotate(Wrapper.children(".content").children(".Code").children("span"), Content);
 	}
 
 	// Provide for Unity to print compiled output
@@ -418,6 +421,21 @@ Commands = function() {
 					Output.get(0).innerText = Content;
 				}
 				break;
+			case "Help":
+				var Output = null;
+				if (typeof Content === 'string' || Content instanceof String) {
+					Output = $(`
+						<p class="${Class} output">${Content}</p>
+					`).appendTo(Outputs);
+				} else {
+					Output = $(`
+						<p class="${Class} output"><code>${Content["display_name"]}</code> (<a href="javascript:void(0)" onclick="Commands.ReadMore('${Content["display_name"]}')">${Localized.Get("阅读全文")}</a>)</p>
+						<p class="${Class} output">${Content["short_description"].capitalize()}</p>
+						<p class="${Class} output">${Localized.Get("参见")}: ${Content["see_also"].map((Name) => Commands.LinkCommand(null, `help ${Name}`, Name)).join(", ")}</p>
+					`).appendTo(Outputs);
+				}
+				Commands.Annotate(Output.find("code").addClass("cm-s-netlogo-default"));
+				break;
 			default:
 				var Output = $(`
 					<p class="${Class} output">${Content}</p>
@@ -436,6 +454,17 @@ Commands = function() {
 		});
 
 		Commands.ScrollToBottom();
+	}
+	
+	// Annotate some code snippets.
+	Commands.Annotate = function(Target, Content) {
+		for (var Item of Target.get())
+			CodeMirror.runMode(Content ? Content : Item.innerText, "netlogo", Item);
+	}
+
+	// Generate a link for another command.
+	Commands.LinkCommand = function(Objective, Target, Text) {
+		return `<a href="javascript:void(0)" onclick="Commands.Execute(${Objective}, '${Target}')">${Text}</a>`;
 	}
 
 	// Clear the input box of Command Center
@@ -456,22 +485,16 @@ Commands = function() {
 
 	// Execute a command from the user
 	Commands.Execute = function(Objective, Content) {
-		Editor.Call("###Execute");
+		Editor.Call({ Type: "CommandExecute", Source: Objective, Command: Content });
 		Commands.PrintInput(Objective, Content);
 		Commands.ScrollToBottom();
 		Commands.ClearInput();
-		Contents = [Objective, Content];
 	}
 
 	// Set the content of command input
 	Commands.SetContent = function(Objective, Content) {
 		CommandEditor.getDoc().setValue(Content);
 		document.querySelector('select').value = Objective.toLowerCase();
-	}
-
-	// Provide for Unity to get command input
-	Commands.GetCommand = function() {
-		return JSON.stringify(Contents);
 	}
 
 	// Provide for Unity to notify completion of the command
@@ -482,3 +505,19 @@ Commands = function() {
 
 	return Commands;
 }();
+
+String.prototype.capitalize = function() {
+	return this.charAt(0).toUpperCase() + this.slice(1);
+};
+
+(function($, undefined){
+	$.fn.asOverlay = function(Timeout = 3000, Animation = 300) {
+		this.Hide = () => this.fadeOut(Animation);
+		this.Show = () => {
+			clearTimeout(this.timeout);
+			this.timeout = setTimeout(() => this.fadeOut(Animation), Timeout);
+			this.fadeIn(Animation);
+		}
+		return this;
+	}
+})(Zepto);

@@ -51,6 +51,14 @@
   color: #666;
 }
 
+.command-output .Help {
+  color: #333;
+}
+
+.command-output .Help a {
+  text-decoration: none;
+}
+
 .command-output .CompilationError,
 .command-output .RuntimeError {
   color: #cc2200;
@@ -75,18 +83,19 @@
 .command-line .wrapper {
   width: 100%;
   display: flex;
-  padding: 0 1rem;
+  padding: 0 0.5rem;
 }
 
 .command-line select {
   background-color: #2F80ED;
   border-radius: 0.24rem;
   color: #fff;
-  padding: 0.5rem 0.7rem;
+  padding: 0.5rem 0.5rem;
   font-size: 30px;
   line-height: 1rem;
   border: none;
-  margin-right: 0.7rem;
+  text-align-last: center;
+  margin-right: 0.5rem;
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
