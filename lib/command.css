@@ -1,5 +1,5 @@
 /** The embedded page is running on quite modern browsers. It is not necessary to consider legacy browsers. */
-.command {
+div.command {
   background: #FFF;
   width: 100%;
   height: 100%;
@@ -15,11 +15,21 @@
   line-height: 1.5rem;
 }
 
-.command-output a {
+.command-output a,
+.command-output command {
   color: #216BBF;
+  cursor: pointer;
 }
 
 .command-output div.block {
+  background: #F5F5F5;
+}
+
+.command-output div.block .command-wrapper {
+  background: #FAFAFA;
+}
+
+.command-output div.block .command-wrapper.active {
   background: #F5F5F5;
 }
 
@@ -41,7 +51,7 @@
   align-items: center;
   width: 1rem;
   padding: 0 16px;
-  display: none;
+  display: flex;
 }
 
 .command-wrapper .content {

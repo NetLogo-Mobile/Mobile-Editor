@@ -356,14 +356,15 @@ Commands = function() {
 	}
 
 	// Print a line of input to the screen
-	Commands.PrintInput = function(Objective, Content) {
+	Commands.PrintInput = function(Objective, Content, Embedded) {
 		if (Objective == null) Objective = $('#Command-Objective').val();
+		else $('#Command-Objective').val(Objective);
 
 		// CodeMirror Content
 		var Wrapper = $(`
 			<div class="command-wrapper">
 				<div class="content">
-					<p class="input Code">${Localized.Get(Objective)}&gt;
+					<p class="input Code">${Objective}&gt;
 						<span class="cm-s-netlogo-default"></span>
 					</p>
 				</div>
@@ -371,15 +372,15 @@ Commands = function() {
 					<img class="copy-icon" src="images/copy.svg">
 				</div>
 			</div>
-		`).appendTo(Outputs);
+		`);
+		
+		if (!Embedded) Wrapper.appendTo(Outputs);
 
 		// Click to activate
-		Wrapper.on("click", () => {
+		/*Wrapper.on("click", () => {
 			$(".command-wrapper").removeClass("active");
-			$(".command-wrapper .icon").css("display", "none");
 			Wrapper.addClass("active");
-			Wrapper.children(".icon").get(0).style.display = "flex";
-		});
+		});*/
 
 		// Click to copy
 		Wrapper.children(".icon").on("click", () => {
@@ -389,7 +390,8 @@ Commands = function() {
 		});
 
 		// Run CodeMirror
-		Commands.Annotate(Wrapper.children(".content").children(".Code").children("span"), Content);
+		AnnotateCode(Wrapper.children(".content").children(".Code").children("span"), Content);
+		return Wrapper;
 	}
 
 	// Provide for Unity to print compiled output
@@ -424,19 +426,31 @@ Commands = function() {
 			case "Help":
 				var Output = null;
 				if (typeof Content === 'string' || Content instanceof String) {
+					if (Content.indexOf("<div class=\"block\">") >= 0) {
+						Output = $(Content).appendTo(Outputs);
+					} else {
+						Output = $(`
+							<p class="${Class} output">${Content}</p>
+						`).appendTo(Outputs);
+					}
+				} else if (typeof Content === 'array' || Content instanceof Array) {
 					Output = $(`
-						<p class="${Class} output">${Content}</p>
+						<div class="block">
+							${Content.map((Source) => `<p class="${Class} output">${Source}</p>`).join("")}
+						</div>
 					`).appendTo(Outputs);
 				} else {
 					Output = $(`
 						<div class="block">
-							<p class="${Class} output"><code>${Content["display_name"]}</code> (<a href="javascript:void(0)" onclick="Commands.ReadMore('${Content["display_name"]}')">${Localized.Get("阅读全文")}</a>)</p>
-							<p class="${Class} output">${Content["short_description"].capitalize()}</p>
-							<p class="${Class} output">${Localized.Get("参见")}: ${Content["see_also"].map((Name) => Commands.LinkCommand(null, `help ${Name}`, Name)).join(", ")}</p>
+							<p class="${Class} output"><code>${Content["display_name"]}</code> - ${Content["agents"].map((Agent) => `${RenderAgent(Agent)}`).join(", ")}</p>
+							<p class="${Class} output">${Content["short_description"].capitalize()} (<a class='command' target='help ${Content["display_name"]} -full'">${Localized.Get("阅读全文")}</a>)</p>
+							<p class="${Class} output">${Localized.Get("参见")}: ${Content["see_also"].map((Name) => `<a class='command' target='help ${Name}'>${Name}</a>`).join(", ")}</p>
 						</div>
 					`).appendTo(Outputs);
 				}
-				Commands.Annotate(Output.find("code").addClass("cm-s-netlogo-default"));
+				LinkCommand(Output.find("a.command"));
+				AnnotateInput(Output.find("div.command"));
+				AnnotateCode(Output.find("code").addClass("cm-s-netlogo-default"));
 				break;
 			default:
 				var Output = $(`
@@ -445,28 +459,67 @@ Commands = function() {
 				break;
 		}
 
-		Output.on("click", (event) => {
+		/*Output.on("click", (event) => {
 			previousNode = event.path[0].previousElementSibling;
-			if (previousNode.className == "command-wrapper") {
+			if (previousNode != null && previousNode.className == "command-wrapper") {
 				$(".command-wrapper").removeClass("active");
-				$(".command-wrapper .icon").css("display", "none");
 				previousNode.className += " active";
 				previousNode.children[1].style.display = "flex";
 			}
-		});
+		});*/
 
 		Commands.ScrollToBottom();
 	}
 	
+	/* Rendering stuff */
 	// Annotate some code snippets.
-	Commands.Annotate = function(Target, Content) {
+	var AnnotateCode = function(Target, Content) {
 		for (var Item of Target.get())
 			CodeMirror.runMode(Content ? Content : Item.innerText, "netlogo", Item);
 	}
+	
+	// Annotate some code inputs.
+	var AnnotateInput = function(Query) {
+		Query.each((Index, Item) => {
+			Item = $(Item);
+			Item.replaceWith(Commands.PrintInput(Item.attr("objective"), Item.attr("target"), true));
+		});
+	}
 
 	// Generate a link for another command.
-	Commands.LinkCommand = function(Objective, Target, Text) {
-		return `<a href="javascript:void(0)" onclick="Commands.Execute(${Objective}, '${Target}')">${Text}</a>`;
+	var LinkCommand = function(Query) {
+		Query.each((Index, Item) => {
+			Item = $(Item);
+			var Target = Item.attr("target");
+			if (Target == null) Target = Item.text();
+			var Objective = Item.attr("objective");
+			Item.attr("href", "javascript:void(0)");
+			Item.attr("onclick", `Commands.Execute(${Objective}, '${Target}')`);
+		})
+		return Query;
+	}
+
+	// Render tips for an agent type.
+	var RenderAgent = (Agent) => {
+		var Message = Agent;
+		switch (Agent) {
+			case "turtles":
+				Message = `${Localized.Get("海龟")}🐢`;
+				break;
+			case "patches":
+				Message = `${Localized.Get("格子")}🔲`;
+				break;
+			case "links":
+				Message = `${Localized.Get("链接")}🔗`;
+				break;
+			case "observer":
+				Message = `${Localized.Get("观察者")}🔎`;
+				break;
+			case "utilities":
+				Message = `${Localized.Get("工具")}🔨`;
+				break;
+		}
+		return Message;
 	}
 
 	// Clear the input box of Command Center
