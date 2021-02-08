@@ -13,7 +13,7 @@ div.command {
   padding-top: 0.5rem;
   overflow: auto;
   box-sizing: border-box;
-  line-height: 1.5rem;
+  line-height: 1.5;
 }
 
 .command-fulltext {

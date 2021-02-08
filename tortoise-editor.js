@@ -584,14 +584,19 @@ Commands = function() {
 		for (var Primitive in Data["see_also"])
 			LinkCommand($(`<li><a class="command" target="help ${Primitive}">${Primitive}</a> - ${Data["see_also"][Primitive]}</li>`).appendTo(SeeAlso).find("a"));
 		// Machine-translation
-		var Translator = Fulltext.find(".translator").toggle(Data["translation"] != null && Data["verified"] != true);
+		var Translator = Fulltext.find(".translator");
+		if (Data["translation"] != null && Data["verified"] != true)
+			Translator.show();
+		else Translator.hide();
 		var Original = Translator.find("a.Original").bind("click", () => {
 			Original.hide();
 			Translation.show();
+			SetContent(Data["content"]);
 		}).parent().show();
 		var Translation = Translator.find("a.Translation").bind("click", () => {
 			Translation.hide();
 			Original.show();
+			SetContent(Data["translation"]);
 		}).parent().hide();
 		// Render the full text
 		var SetContent = (Content) => {
