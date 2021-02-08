@@ -6,13 +6,74 @@ div.command {
   font-size: 30px;
 }
 
-.command-output {
+.command-output,
+.command-fulltext {
   width: 100%;
-  height: calc(100% - 3.7rem);
+  height: calc(100% - 2.7rem);
   padding-top: 0.5rem;
   overflow: auto;
   box-sizing: border-box;
   line-height: 1.5rem;
+}
+
+.command-fulltext {
+  color: #333;
+  display: none;
+  padding: 0 1rem;
+  font-size: 1.1rem;
+}
+
+.command-fulltext h2 {
+  font-size: 1.5rem;
+  margin: 0.5em 0;
+}
+
+.command-fulltext h4 {
+  font-size: 1.2rem;
+  margin: 0.5em 0;
+}
+
+.command-fulltext p,
+.command-fulltext ul {
+  margin: 0 0 0.5em 0;
+}
+
+.command-fulltext a {
+  color:#216BBF;
+  font-weight: normal;
+  text-decoration: none;
+}
+
+.command-fulltext pre {
+  padding: 0.25em 0.5em;
+  margin: 0 0 0.5em;
+}
+
+.command-fulltext pre,
+.command-fulltext code {
+  background: #F7F7F7;
+}
+
+.command-fulltext code img {
+  padding: 0 0 0 0.25em;
+}
+
+.command-fulltext h2 span {
+  color: #666;
+  margin: 0 0 0 0.5em;
+  font-size: 1rem;
+  font-weight: normal;
+}
+
+.command-fulltext div.translator {
+  margin: 0 0 0.5em 0;
+  padding: 0.25em 0.5em;
+  font-size: 1rem;
+  background: #F7F7F7;
+}
+
+.command-fulltext div.translator p {
+  margin: 0;
 }
 
 .command-output a,

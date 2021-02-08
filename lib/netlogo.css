@@ -4,6 +4,7 @@
 html, body, select {
 	margin: 0;
 	padding: 0;
+	scroll-behavior: smooth;
 	overflow: hidden;
 	font-size: 30px;
 	font-family: Microsoft YaHei, Arial, Helvetica, sans-serif;

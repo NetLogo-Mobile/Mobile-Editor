@@ -246,6 +246,7 @@ Commands = function() {
 	var Commands = {};
 	var CommandEditor = null;
 	var Outputs = null;
+	var Fulltext = null;
 
 	// Following three variables are used for command histrory.
 	var CommandStack = [];
@@ -265,6 +266,7 @@ Commands = function() {
 		bodyScrollLock.clearAllBodyScrollLocks();
 		bodyScrollLock.disableBodyScroll(document.querySelector('div.command-output'));
 		CommandEditor.refresh();
+		Commands.HideFullText();
 	}
 
 	// Hide Command Center and MainEditor would show up
@@ -280,7 +282,7 @@ Commands = function() {
 		// Get the elements
 		Commands.Container = $("#Command-Center");
 		Outputs = $(".command-output");
-		Commands.Hide();
+		Fulltext = $(".command-fulltext");
 		// CodeMirror Editor
 		CommandEditor = CodeMirror(document.getElementById("Command-Input"), {
 			mode: "netlogo",
@@ -353,6 +355,8 @@ Commands = function() {
 				$("#Container").css("height", `${Height}px`);
 				$("#Command-Line").css("bottom", `${Offset}px`);
 			});
+			
+		Commands.Show();
 	}
 
 	// Print a line of input to the screen
@@ -375,18 +379,12 @@ Commands = function() {
 		`);
 		
 		if (!Embedded) Wrapper.appendTo(Outputs);
-
-		// Click to activate
-		/*Wrapper.on("click", () => {
-			$(".command-wrapper").removeClass("active");
-			Wrapper.addClass("active");
-		});*/
+		Wrapper.attr("objective", Objective);
+		Wrapper.attr("content", Content);
 
 		// Click to copy
 		Wrapper.children(".icon").on("click", () => {
-			const input = Wrapper.find("p.input").get(0).innerText;
-			const [objective, command] = input.split("> ");
-			Commands.SetContent(objective, command);
+			Commands.SetContent(Wrapper.attr("objective"), Wrapper.attr("content"));
 		});
 
 		// Run CodeMirror
@@ -439,18 +437,22 @@ Commands = function() {
 							${Content.map((Source) => `<p class="${Class} output">${Source}</p>`).join("")}
 						</div>
 					`).appendTo(Outputs);
+				} else if (Content.Parameter == "-full") {
+					this.ShowFullText(Content);
 				} else {
 					Output = $(`
 						<div class="block">
 							<p class="${Class} output"><code>${Content["display_name"]}</code> - ${Content["agents"].map((Agent) => `${RenderAgent(Agent)}`).join(", ")}</p>
-							<p class="${Class} output">${Content["short_description"].capitalize()} (<a class='command' target='help ${Content["display_name"]} -full'">${Localized.Get("阅读全文")}</a>)</p>
+							<p class="${Class} output">${Content["short_description"]} (<a class='command' target='help ${Content["display_name"]} -full'">${Localized.Get("阅读全文")}</a>)</p>
 							<p class="${Class} output">${Localized.Get("参见")}: ${Content["see_also"].map((Name) => `<a class='command' target='help ${Name}'>${Name}</a>`).join(", ")}</p>
 						</div>
 					`).appendTo(Outputs);
 				}
-				LinkCommand(Output.find("a.command"));
-				AnnotateInput(Output.find("div.command"));
-				AnnotateCode(Output.find("code").addClass("cm-s-netlogo-default"));
+				if (Output != null) {
+					LinkCommand(Output.find("a.command"));
+					AnnotateInput(Output.find("div.command"));
+					AnnotateCode(Output.find("code"));
+				}
 				break;
 			default:
 				var Output = $(`
@@ -473,9 +475,18 @@ Commands = function() {
 	
 	/* Rendering stuff */
 	// Annotate some code snippets.
-	var AnnotateCode = function(Target, Content) {
-		for (var Item of Target.get())
+	var AnnotateCode = function(Target, Content, AllowCopy) {
+		for (var Item of Target.get()) {
+			var Snippet = $(Item);
+			// Render the code
+			Snippet.addClass("cm-s-netlogo-default");
 			CodeMirror.runMode(Content ? Content : Item.innerText, "netlogo", Item);
+			// Copy support
+			if (AllowCopy && Item.innerText.trim().indexOf(" ") >= 0 && Snippet.parent("pre").size() == 0)
+				Snippet.addClass("copyable").append($(`<img class="copy-icon" src="images/copy.svg">`)).on("click", function() {
+					Commands.SetContent("observer", this.innerText);
+				});
+		}
 	}
 	
 	// Annotate some code inputs.
@@ -493,6 +504,7 @@ Commands = function() {
 			var Target = Item.attr("target");
 			if (Target == null) Target = Item.text();
 			var Objective = Item.attr("objective");
+			if (!Objective) Objective = "null";
 			Item.attr("href", "javascript:void(0)");
 			Item.attr("onclick", `Commands.Execute(${Objective}, '${Target}')`);
 		})
@@ -554,16 +566,53 @@ Commands = function() {
 
 	// Provide for Unity to notify completion of the command
 	Commands.FinishExecution = function(Status, Message) {
+		Commands.HideFullText();
 		Commands.PrintOutput(Message, Status);
 		Commands.Disabled = false;
 	}
 
+	// Show the full text of a command.
+	Commands.ShowFullText = function(Data) {
+		// Change the status
+		Fulltext.show();
+		Outputs.hide();
+		// Render the subject
+		$(Fulltext.find("h2 strong")).text(Data["display_name"]);
+		$(Fulltext.find("h2 span")).text(`(${Data["agents"].map((Agent) => `${RenderAgent(Agent)}`).join(", ")})`);
+		// Render the list
+		var SeeAlso = Fulltext.find("ul.SeeAlso").empty();
+		for (var Primitive in Data["see_also"])
+			LinkCommand($(`<li><a class="command" target="help ${Primitive}">${Primitive}</a> - ${Data["see_also"][Primitive]}</li>`).appendTo(SeeAlso).find("a"));
+		// Machine-translation
+		var Translator = Fulltext.find(".translator").toggle(Data["translation"] != null && Data["verified"] != true);
+		var Original = Translator.find("a.Original").bind("click", () => {
+			Original.hide();
+			Translation.show();
+		}).parent().show();
+		var Translation = Translator.find("a.Translation").bind("click", () => {
+			Translation.hide();
+			Original.show();
+		}).parent().hide();
+		// Render the full text
+		var SetContent = (Content) => {
+			if (Content != null) Fulltext.find("div.fulltext")
+				.html(new showdown.Converter().makeHtml(Content));
+			AnnotateCode(Fulltext.find("code"), null, true);
+			window.scrollTo(0, 0);
+		}
+		SetContent(Data["translation"] != null ? Data["translation"] : Data["content"]);
+	}
+
+	// Hide the full text mode.
+	Commands.HideFullText = function() {
+		Fulltext.hide();
+		Outputs.show();
+		window.scrollTo(0, document.body.scrollHeight);
+
+	}
+
 	return Commands;
 }();
-
-String.prototype.capitalize = function() {
-	return this.charAt(0).toUpperCase() + this.slice(1);
-};
 
 (function($, undefined){
 	$.fn.asOverlay = function(Timeout = 3000, Animation = 300) {
