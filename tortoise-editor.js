@@ -275,6 +275,7 @@ Commands = function() {
 		Commands.Container.css("display", "none");
 		bodyScrollLock.clearAllBodyScrollLocks();
 		bodyScrollLock.disableBodyScroll(document.querySelector('.CodeMirror-scroll'), { allowTouchMove: () => true });
+		Editor.MainEditor.refresh();
 	}
 
 	// Initialize the command center
@@ -283,6 +284,7 @@ Commands = function() {
 		Commands.Container = $("#Command-Center");
 		Outputs = $(".command-output");
 		Fulltext = $(".command-fulltext");
+		AnnotateCode(Outputs.find(".keep code"), null, true);
 		// CodeMirror Editor
 		CommandEditor = CodeMirror(document.getElementById("Command-Input"), {
 			mode: "netlogo",
@@ -373,7 +375,7 @@ Commands = function() {
 					</p>
 				</div>
 				<div class="icon">
-					<img class="copy-icon" src="images/copy.svg">
+					<img class="copy-icon" src="images/copy.png"/>
 				</div>
 			</div>
 		`);
@@ -483,7 +485,7 @@ Commands = function() {
 			CodeMirror.runMode(Content ? Content : Item.innerText, "netlogo", Item);
 			// Copy support
 			if (AllowCopy && Item.innerText.trim().indexOf(" ") >= 0 && Snippet.parent("pre").size() == 0)
-				Snippet.addClass("copyable").append($(`<img class="copy-icon" src="images/copy.svg">`)).on("click", function() {
+				Snippet.addClass("copyable").append($(`<img class="copy-icon" src="images/copy.png"/>`)).on("click", function() {
 					Commands.SetContent("observer", this.innerText);
 				});
 		}
@@ -603,17 +605,18 @@ Commands = function() {
 			if (Content != null) Fulltext.find("div.fulltext")
 				.html(new showdown.Converter().makeHtml(Content));
 			AnnotateCode(Fulltext.find("code"), null, true);
-			window.scrollTo(0, 0);
+			document.querySelector('.command-fulltext').scrollTop = 0;
 		}
 		SetContent(Data["translation"] != null ? Data["translation"] : Data["content"]);
+		// Acknowledge
+		Fulltext.find(".Acknowledge").text(Data["acknowledge"])
 	}
 
 	// Hide the full text mode.
 	Commands.HideFullText = function() {
 		Fulltext.hide();
 		Outputs.show();
-		window.scrollTo(0, document.body.scrollHeight);
-
+		Commands.ScrollToBottom();
 	}
 
 	return Commands;

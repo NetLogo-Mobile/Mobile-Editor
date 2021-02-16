@@ -7,10 +7,9 @@ html, body, select {
 	scroll-behavior: smooth;
 	overflow: hidden;
 	font-size: 30px;
-	font-family: Microsoft YaHei, Arial, Helvetica, sans-serif;
 }
-code {
-	font-family: Microsoft YaHei, Arial, Helvetica, sans-serif;
+html, body, select, code {
+	font-family: Consolas, "Droid Sans Mono", "Microsoft Yahei", monospace;
 }
 p {
 	margin: 0;
@@ -31,11 +30,7 @@ p {
 #Main-Editor .CodeMirror {
 	width: 100%;
 	height: 100%;
-}
-.CodeMirror,
-.CodeMirror-hints {
-	font-family: Consolas, monospace;
-}
+}x
 .CodeMirror-linenumber {
     padding: 0 8px 0 26px;
 	font-size: 28px;
