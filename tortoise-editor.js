@@ -101,6 +101,11 @@ Editor = function() {
 		MainEditor.on("changes", () => Editor.Call({ Type: "CodeChanged" }));
 	}
 
+	// GetEditor: Get the main editor.
+	Editor.GetEditor = function() {
+		return MainEditor;
+	}
+
 	// GetContent: Get the content of the editor.
 	Editor.GetContent = function() {
 		return MainEditor.getValue();
@@ -228,6 +233,7 @@ Localized = function() {
 	// Initialize: Initialize the manager with given data.
 	Localized.Initialize = function(Data) {
 		Localized.Data = Data;
+		Editor.GetEditor().options.phrases = Data;
 		$(".Localized").each((Index, Target) => $(Target).text(Localized.Get($(Target).text())));
 	}
 
