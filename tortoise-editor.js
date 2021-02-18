@@ -135,11 +135,13 @@ Editor = function() {
 
 	// Find: Start finding things.
 	Editor.Find = function() {
+		Editor.ClearDialogs();
 		MainEditor.execCommand("find");
 	}
 
 	// Replace: Start replace things.
 	Editor.Replace = function() {
+		Editor.ClearDialogs();
 		MainEditor.execCommand("replace");
 	}
 	
@@ -147,7 +149,15 @@ Editor = function() {
 	Editor.JumpTo = function(Data) {
 		if (Data != null) {
 			
-		} else MainEditor.execCommand("jumpToLine");
+		} else {
+			Editor.ClearDialogs();
+			MainEditor.execCommand("jumpToLine");
+		}
+	}
+
+	// ClearDialogs: Clear all dialogs.
+	Editor.ClearDialogs = function() {
+		$(".CodeMirror-dialog").remove();
 	}
 
 	// ShowProcedures: List all procedures in the code.
@@ -238,29 +248,14 @@ Editor = function() {
 		});
 		// Other interfaces
 		Overlays.Initialize();
-		$(".CodeMirror-dialog").remove();
+		Editor.ClearDialogs();
 		Editor.MainEditor = MainEditor;
 	}
 
 	// Engine features
 	// Resize: Resize the viewport width (on mobile platforms)
-	var Resize = function(Width) {
-		$("#viewport").attr("content", "width=" + Width + ",user-scalable=no,minimum-scale=1.0,maximum-scale=1.0,initial-scale=1.0,viewport-fit=cover");
-	}
-	var ResizeHandler = null;
 	Editor.Resize = function (Width) {
-		if (navigator.userAgent.indexOf("NetLogo") != -1) {
-			if (ResizeHandler != null) clearTimeout(ResizeHandler);
-			// On some iOS devices, the animated rotation takes some time
-			// and sometimes it causes the scaling to be nullified...
-			ResizeHandler = setTimeout(function () {
-					Resize(Width - 1);
-					ResizeHandler = setTimeout(function () {
-							Resize(Width);
-							ResizeHandler = null;
-					}, 100);
-			}, 100);
-		} else Resize(Width);
+		$("#viewport").attr("content", `width=${Width},user-scalable=no,viewport-fit=cover`);
 	}
 
 	// Call: Call the Unity engine.
@@ -331,7 +326,7 @@ Commands = function() {
 		bodyScrollLock.disableBodyScroll(document.querySelector('div.command-output'));
 		CommandEditor.refresh();
 		Commands.HideFullText();
-		$(".CodeMirror-dialog").remove();
+		Editor.ClearDialogs();
 	}
 
 	// Hide Command Center and MainEditor would show up

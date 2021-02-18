@@ -164,11 +164,11 @@ div.command {
 
 .command-line select {
   background-color: #2F80ED;
-  border-radius: 0.24rem;
+  border-radius: 0.5rem;
   color: #fff;
   padding: 0.5rem 0.5rem;
   font-size: 30px;
-  line-height: 1rem;
+  line-height: 1.05rem;
   border: none;
   text-align-last: center;
   margin-right: 0.5rem;
