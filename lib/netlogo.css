@@ -4,8 +4,11 @@
 html, body, select {
 	margin: 0;
 	padding: 0;
-	scroll-behavior: smooth;
+	font-size: 1em;
 	overflow: hidden;
+	scroll-behavior: smooth;
+}
+html {
 	font-size: 30px;
 }
 html, body, select, code, .CodeMirror-dialog input {
@@ -37,7 +40,7 @@ p {
 }
 .CodeMirror-linenumber {
     padding: 0 8px 0 26px;
-	font-size: 28px;
+	font-size: 0.9em;
 }
 .CodeMirror-marker-error {
 	display: inline-block;

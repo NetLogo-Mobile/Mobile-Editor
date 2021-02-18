@@ -254,8 +254,13 @@ Editor = function() {
 
 	// Engine features
 	// Resize: Resize the viewport width (on mobile platforms)
-	Editor.Resize = function (Width) {
-		$("#viewport").attr("content", `width=${Width},user-scalable=no,viewport-fit=cover`);
+	Editor.Resize = function (Ratio) {
+		$("#viewport").attr("content", `width=device-width,initial-scale=${Ratio},maximum-scale=${Ratio},minimum-scale=${Ratio},user-scalable=no,viewport-fit=cover`);
+	}
+
+	// SetDesktop: Set the desktop mode.
+	Editor.SetFontsize = function(Status) {
+		$("html").css("font-size", Status + "px");
 	}
 
 	// Call: Call the Unity engine.
@@ -318,6 +323,9 @@ Commands = function() {
 	// Command center would be disabled before compile output come out.
 	Commands.Disabled = false;
 
+	// Whether it is visible.
+	Commands.Visible = true;
+
 	// Hide MainEditor and Command Center would show up
 	Commands.Show = function() {
 		Editor.Container.css("display", "none");
@@ -326,6 +334,7 @@ Commands = function() {
 		bodyScrollLock.disableBodyScroll(document.querySelector('div.command-output'));
 		CommandEditor.refresh();
 		Commands.HideFullText();
+		Commands.Visible = true;
 		Editor.ClearDialogs();
 	}
 
@@ -333,6 +342,7 @@ Commands = function() {
 	Commands.Hide = function() {
 		Editor.Container.css("display", "block");
 		Commands.Container.css("display", "none");
+		Commands.Visible = false;
 		bodyScrollLock.clearAllBodyScrollLocks();
 		bodyScrollLock.disableBodyScroll(document.querySelector('.CodeMirror-scroll'), { allowTouchMove: () => true });
 		Editor.MainEditor.refresh();
@@ -417,7 +427,7 @@ Commands = function() {
 				var Height = window.visualViewport.height;
 				var Offset = window.innerHeight - Height;
 				$("#Container").css("height", `${Height}px`);
-				$("#Command-Line").css("bottom", `${Offset}px`);
+				if (Commands.Visible) $(".command-output").scrollTop(100000);
 			});
 			
 		Commands.Show();
