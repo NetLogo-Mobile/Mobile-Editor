@@ -133,6 +133,61 @@ Editor = function() {
 		MainEditor.doc.redo();
 	}
 
+	// Find: Start finding things.
+	Editor.Find = function() {
+		MainEditor.execCommand("find");
+	}
+
+	// Replace: Start replace things.
+	Editor.Replace = function() {
+		MainEditor.execCommand("replace");
+	}
+	
+	// JumpTo: Try to jump to lines or a specific place.
+	Editor.JumpTo = function(Data) {
+		if (Data != null) {
+			
+		} else MainEditor.execCommand("jumpToLine");
+	}
+
+	// ShowProcedures: List all procedures in the code.
+	Editor.ShowProcedures = function() {
+		var Procedures = Editor.GetProcedures();
+		if (Object.keys(Procedures).length == 0) {
+			Editor.Toast("warning", Localized.Get("代码中还没有任何子程序。"));
+		} else {
+			var List = $("#Dialog-Procedures ul").empty();
+			for (var Procedure in Procedures) {
+				$(`<li>${Procedure}</li>`).appendTo(List)
+					.attr("start", Procedures[Procedure][0])
+					.attr("end", Procedures[Procedure][1]).click(function() {
+					var Start = MainEditor.doc.posFromIndex($(this).attr("start"));
+					var End = MainEditor.doc.posFromIndex($(this).attr("end"));
+					MainEditor.scrollIntoView(Start, 200);
+					MainEditor.setSelection(Start, End);
+					$.modal.close();
+				});
+			}
+			$("#Dialog-Procedures").modal({});
+		}
+	}
+
+	// GetProcedures: Get all procedures from the code.
+	Editor.GetProcedures = function() {
+		var Rule = /^\s*(?:to|to-report)\s(?:\s*;.*\n)*\s*(\w\S*)/gm // From NLW
+		var Content = Editor.GetContent(); var Names = [];
+		while (Match = Rule.exec(Content)) {
+			var Length = Match.index + Match[0].length;
+			Names[Match[1]] = [ Length - Match[1].length, Length ];
+		}
+		return Names;
+	}
+
+	// Toast: Show a toast.
+	Editor.Toast = function(Type, Content, Subject) {
+		toastr[Type](Content, Subject);
+	}
+
 	// Initialize the editor.
 	Editor.Initialize = function() {
 		Editor.Container = $("#Main-Editor");
@@ -142,7 +197,9 @@ Editor = function() {
 			lineWrapping: true,
 			mode: "netlogo",
 			theme: "netlogo-default",
-			gutters: ["error", "CodeMirror-linenumbers"]
+			gutters: ["error", "CodeMirror-linenumbers"],
+			matchBrackets: true,
+			autoCloseBrackets: true
 		});
 		// Auto complete
 		CodeMirror.registerHelper('hintWords', 'netlogo', window.keywords.all.filter(
@@ -181,13 +238,14 @@ Editor = function() {
 		});
 		// Other interfaces
 		Overlays.Initialize();
+		$(".CodeMirror-dialog").remove();
 		Editor.MainEditor = MainEditor;
 	}
 
 	// Engine features
 	// Resize: Resize the viewport width (on mobile platforms)
 	var Resize = function(Width) {
-		$("#viewport").attr("content", "width=" + Width + ",user-scalable=no,viewport-fit=cover");
+		$("#viewport").attr("content", "width=" + Width + ",user-scalable=no,minimum-scale=1.0,maximum-scale=1.0,initial-scale=1.0,viewport-fit=cover");
 	}
 	var ResizeHandler = null;
 	Editor.Resize = function (Width) {
@@ -273,6 +331,7 @@ Commands = function() {
 		bodyScrollLock.disableBodyScroll(document.querySelector('div.command-output'));
 		CommandEditor.refresh();
 		Commands.HideFullText();
+		$(".CodeMirror-dialog").remove();
 	}
 
 	// Hide Command Center and MainEditor would show up
@@ -297,7 +356,9 @@ Commands = function() {
 			theme: "netlogo-default",
 			scrollbarStyle: "null",
 			viewportMargin: Infinity,
-			cursorHeight: 0.8
+			cursorHeight: 0.8,
+			matchBrackets: true,
+			autoCloseBrackets: true
 		});
 
 		CommandEditor.on('keyup', (cm, event) => {
@@ -490,7 +551,7 @@ Commands = function() {
 			Snippet.addClass("cm-s-netlogo-default");
 			CodeMirror.runMode(Content ? Content : Item.innerText, "netlogo", Item);
 			// Copy support
-			if (AllowCopy && Item.innerText.trim().indexOf(" ") >= 0 && Snippet.parent("pre").size() == 0)
+			if (AllowCopy && Item.innerText.trim().indexOf(" ") >= 0 && Snippet.parent("pre").length == 0)
 				Snippet.addClass("copyable").append($(`<img class="copy-icon" src="images/copy.png"/>`)).on("click", function() {
 					Commands.SetContent("observer", this.innerText);
 				});
@@ -638,4 +699,4 @@ Commands = function() {
 		}
 		return this;
 	}
-})(Zepto);
+})(jQuery);

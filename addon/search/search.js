@@ -191,16 +191,16 @@
 
 
   function getQueryDialog(cm)  {
-    return '<span class="CodeMirror-search-label">' + cm.phrase("Search:") + '</span> <input type="text" style="width: 10em" class="CodeMirror-search-field"/> <span style="color: #888" class="CodeMirror-search-hint">' + cm.phrase("(Use /re/ syntax for regexp search)") + '</span>';
+    return '<span class="CodeMirror-search-label">' + cm.phrase("查找：") + '</span> <input type="text" style="width: 10em" class="CodeMirror-search-field"/>';
   }
   function getReplaceQueryDialog(cm) {
-    return ' <input type="text" style="width: 10em" class="CodeMirror-search-field"/> <span style="color: #888" class="CodeMirror-search-hint">' + cm.phrase("(Use /re/ syntax for regexp search)") + '</span>';
+    return ' <input type="text" style="width: 10em" class="CodeMirror-search-field"/>';
   }
   function getReplacementQueryDialog(cm) {
-    return '<span class="CodeMirror-search-label">' + cm.phrase("With:") + '</span> <input type="text" style="width: 10em" class="CodeMirror-search-field"/>';
+    return '<span class="CodeMirror-search-label">' + cm.phrase("替换成：") + '</span> <input type="text" style="width: 10em" class="CodeMirror-search-field"/>';
   }
   function getDoReplaceConfirm(cm) {
-    return '<span class="CodeMirror-search-label">' + cm.phrase("Replace?") + '</span> <button>' + cm.phrase("Yes") + '</button> <button>' + cm.phrase("No") + '</button> <button>' + cm.phrase("All") + '</button> <button>' + cm.phrase("Stop") + '</button> ';
+    return '<span class="CodeMirror-search-label">' + cm.phrase("进行替换？") + '</span> <button>' + cm.phrase("确认") + '</button> <button>' + cm.phrase("取消") + '</button> <button>' + cm.phrase("全部") + '</button> <button>' + cm.phrase("停止") + '</button> ';
   }
 
   function replaceAll(cm, query, text) {
@@ -217,7 +217,7 @@
   function replace(cm, all) {
     if (cm.getOption("readOnly")) return;
     var query = cm.getSelection() || getSearchState(cm).lastQuery;
-    var dialogText = '<span class="CodeMirror-search-label">' + (all ? cm.phrase("Replace all:") : cm.phrase("Replace:")) + '</span>';
+    var dialogText = '<span class="CodeMirror-search-label">' + (all ? cm.phrase("全部替换：") : cm.phrase("替换：")) + '</span>';
     dialog(cm, dialogText + getReplaceQueryDialog(cm), dialogText, query, function(query) {
       if (!query) return;
       query = parseQuery(query);

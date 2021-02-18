@@ -1,9 +1,11 @@
 
 <head>
-	<meta id="viewport" name="viewport" content="width=560,user-scalable=no,viewport-fit=cover">
+	<meta id="viewport" name="viewport" content="width=700,user-scalable=no,minimum-scale=1.0,maximum-scale=1.0,initial-scale=1.0,viewport-fit=cover">
 	<link rel="stylesheet" href="lib/codemirror.css">
 	<link rel="stylesheet" href="addon/hint/show-hint.css">
 	<link rel="stylesheet" href="addon/dialog/dialog.css">
+	<link rel="stylesheet" href="lib/toastr.css">
+	<link rel="stylesheet" href="lib/jquery.modal.min.css">
 	<link rel="stylesheet" href="lib/netlogo.css">
 	<link rel="stylesheet" href="lib/command.css">
 	<meta charset="UTF-8" />
@@ -15,10 +17,14 @@
 	<script src="addon/search/search.js"></script>
 	<script src="addon/search/searchcursor.js"></script>
 	<script src="addon/search/jump-to-line.js"></script>
-	<script src="lib/zepto.min.js"></script>
+	<script src="addon/edit/matchbrackets.js"></script>
+	<script src="addon/edit/closebrackets.js"></script>
+	<script src="lib/jquery.min.js"></script>
+	<script src="lib/jquery.modal.min.js"></script>
 	<script src="lib/showdown.min.js"></script>
 	<script src="lib/scrolllock.js"></script>
 	<script src="lib/netlogo.js"></script>
+	<script src="lib/toastr.min.js"></script>
 </head>
 <body>
 	<div id="Container">
@@ -60,10 +66,14 @@
 			<div id="Main-CodeMirror"></div>
 			<div class="Overlays">
 				<div id="Rotate-Screen" class="Backdrop">
-					<img src="images/rotate.svg" />
+					<img src="images/rotate.png" />
 					<p class="Localized">编辑器支持竖屏使用。旋转屏幕获得最佳体验！</p>
 				</div>
 			</div>
+		</div>
+		<div id="Dialog-Procedures" class="modal">
+			<h4 class="Localized">跳转到子程序</h4>
+			<ul></ul>
 		</div>
 	</div>
 	<script type="text/javascript">
