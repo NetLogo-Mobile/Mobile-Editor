@@ -23,10 +23,12 @@ p {
 	overflow: hidden;
 	box-sizing: border-box;
 }
+
+/** Code Editor **/
 #Main-Editor {
 	width: 100%;
 	height: 100%;
-	line-height: 1.3rem;
+	line-height: 1.3;
 	position: relative;
 	flex-direction: column;
 }
@@ -34,30 +36,37 @@ p {
 	width: 100%;
 	height: 100%;
 }
-
+.jconfirm-content {
+	font-size: 0.9em;
+	line-height: 1.5;
+}
+.CodeMirror-dialog {
+	background: #082A84;
+	color: #FFF;
+}
 .CodeMirror-dialog input {
 	font-size: 1rem;
 }
 .CodeMirror-linenumber {
-    padding: 0 8px 0 26px;
+    padding: 0 0.26em 0 0.85em;
 	font-size: 0.9em;
 }
 .CodeMirror-marker-error {
 	display: inline-block;
-	width: 22px;
-	height: 22px;
-	margin: 8px 3px;
+	width: 0.7em;
+	height: 0.7em;
+	margin: 0.3em 0.1em;
 	background-image: url(../images/error.png);
 }
 .CodeMirror-context-tips {
 	cursor: pointer;
-	padding: 5px 10px;
-	font-size: 28px;
-	line-height: 125%;
-	background: #FFFFE0;
+	padding: 0.2em 0.3em;
+	font-size: 0.9em;
+	line-height: 1.2;
+	background: #FFFFF0;
 }
 .CodeMirror pre.CodeMirror-line, .CodeMirror pre.CodeMirror-line-like {
-	padding: 0 4px 0 8px;
+	padding: 0 0.13em 0 0.26em;
 }
 
 /* Overlays */

@@ -13,6 +13,7 @@ Editor = function() {
 		TipsActive = true;
 		Editor.ClearHighlights();
 	}
+
 	// Hide the tips
 	Editor.HideTips = function() {
 		$("#Main-Tips").hide();
@@ -23,19 +24,16 @@ Editor = function() {
 	// ShowErrors: Show the error tips & markers.
 	Editor.ShowErrors = function(Error) {
 		Editor.ClearHighlights();
-		var Item = new Highlight("error", JSON.parse(Error)[0]);
-		Item.MarkText();
-		Item.ShowTips();
-		Item.ShowGutter();
-		Item.ScrollIntoView();
-		Highlights.push(Item);
+		Highlights.push(new Highlight("error", JSON.parse(Error)[0]).ShowAll());
 	}
 
 	// ClearHighlights: Clear all highlights.
 	var Highlights = [];
+	var ContextualHighlight = null;
 	Editor.ClearHighlights = function() {
 		for (var I = 0; I < Highlights.length; I++)
 			Highlights[I].Clear();
+		Editor.ClearExplanation();
 		Highlights = [];
 	}
 
@@ -43,6 +41,9 @@ Editor = function() {
 	var Highlight = function(Type, Source) {
 		this.Type = Type;
 		this.Message = Source.message;
+		this.PositionFrom = Source.from;
+		this.PositionTo = Source.to;
+		if (this.PositionFrom != null && this.PositionTo != null) return;
 		var LineCount = MainEditor.lineCount();
 		var Accumulated = 0;
 		for (var N = 0; N < LineCount; N++) {
@@ -57,31 +58,108 @@ Editor = function() {
 		if (this.TextMarker != null) this.TextMarker.clear();
 		if (this.Gutter != null) MainEditor.doc.setGutterMarker(this.PositionFrom.line, this.Type, null);
 		if (this.TipsWidget != null) this.HideTips();
+		return null;
 	}
 	Highlight.prototype.ScrollIntoView = function(Distance = 200) {
 		MainEditor.scrollIntoView(this.PositionFrom, Distance);
+		return this;
 	}
 	Highlight.prototype.MarkText = function() {
 		this.TextMarker = MainEditor.doc.markText(this.PositionFrom, this.PositionTo, { className: "cm-" + this.Type });
 		return this;
 	}
-	Highlight.prototype.ShowTips = function() {
+	Highlight.prototype.ShowTips = function(Callback) {
 		if (this.TipsWidget != null) return;
 		var Element = $("<div class='CodeMirror-context-tips'></div>");
-		Element.text(this.Message);
-		Element[0].onclick = () => this.HideTips();
+		if (this.Message.indexOf("<span") != -1)
+			Element.html(this.Message);
+		else Element.text(this.Message);
+		Element[0].onclick = Callback != null ? Callback : () => this.HideTips();
 		this.TipsWidget = MainEditor.doc.addLineWidget(this.PositionFrom.line, Element[0], {});
+		return this;
 	}
 	Highlight.prototype.HideTips = function() {
 		if (this.TipsWidget == null) return;
 		this.TipsWidget.clear();
 		this.TipsWidget = null;
+		return this;
 	}
 	Highlight.prototype.ShowGutter = function() {
 		this.Gutter = $("<div class='CodeMirror-marker-" + this.Type + "'></div>")[0];
 		this.Gutter.Callback = () => this.ShowTips();
 		MainEditor.doc.setGutterMarker(this.PositionFrom.line, this.Type, this.Gutter);
 		return this;
+	}
+	Highlight.prototype.ShowAll = function(Callback) {
+		return this.MarkText().ShowTips(Callback).ShowGutter().ScrollIntoView();
+	}
+
+	// Explain support
+	// Explain: Start explaining things.
+	Editor.Explain = function(Explicit = true) {
+		if (Commands.Visible) {
+			Commands.Explain(Explicit);
+		} else {
+			ExplainInternal(Explicit);
+		}
+	}
+
+	// ExplainNotFound: Show toast for explain not found.
+	Editor.ExplainNotFound = function() {
+		Editor.Toast("warning", Localized.Get("未能找到选中内容的相关信息。"));
+	}
+
+	// ClearExplanation: Clear the explanation.
+	Editor.ClearExplanation = function() {
+		if (ContextualHighlight != null)
+			ContextualHighlight = ContextualHighlight.Clear();
+	}
+	
+	// ExplainInEditor: Explain in the editor.
+	var ExplainHandle = 0;
+	var ExplainInternal = function(Explicit) {
+		// Clear the timeout handle
+		clearTimeout(ExplainHandle);
+		if (!MainEditor.doc.somethingSelected()) return;
+		// Get the first and try to expand it
+		var Selection = MainEditor.doc.listSelections()[0];
+		var Packet = { from: Selection.anchor, to: Selection.head };
+		// Recognize the command
+		for (var I = Packet.from.line; I <= Packet.to.line; I++) {
+			var Tokens = MainEditor.getLineTokens(I);
+			for (var Token of Tokens) {
+				// Check eligibility
+				if (I == Packet.from.line && Token.end < Packet.from.ch) continue;
+				if (I == Packet.to.line && Token.start > Packet.to.ch) continue;
+				if (Token.type == null) continue;
+				// Ignore if there are multiple eligible tokens
+				if (Packet.message != null && !Explicit) return;
+				// Show information
+				var Command = `<span class="cm-${Token.type}">${Token.string}</span>`
+				Packet.command = Token.string;
+				if (Dictionary.Check(Packet.command)) {
+					Packet.message = `${Command}: ${Dictionary.Get(Packet.command)} ➤`;
+				} else if (Dictionary.Check("~" + Token.type)) {
+					Packet.message = Dictionary.Get("~" + Token.type).replace("{0}", Command);
+					Packet.command = null;
+				} else {
+					// Packet.message = Token.type;
+				}
+			}
+			if (Packet.message != null) break;
+		}
+		// Message not found
+		if (Packet.message == null) {
+			if (!Explicit) return;
+			return Editor.ExplainNotFound();
+		} 
+		// Show the highlight
+		Editor.ClearExplanation();
+		ContextualHighlight = new Highlight("help", Packet).ShowAll(() => {
+			if (Packet.command != null)
+				Commands.Execute(null, `help ${Packet.command} -full`);
+			Editor.ClearExplanation();
+		});
 	}
 
 	// Editor support
@@ -198,6 +276,29 @@ Editor = function() {
 		toastr[Type](Content, Subject);
 	}
 
+	// Reset: Show the reset dialog.
+	Editor.Reset = function() {
+		$.confirm({
+			title: Localized.Get("重置代码"),
+			content: Localized.Get("是否将代码重置到最后一次成功编译的状态？"),
+			type: 'green',
+			useBootstrap: false,
+			buttons: {   
+				ok: {
+					text: Localized.Get("确定"),
+					btnClass: 'btn-primary',
+					keys: ['enter'],
+					action: function() {
+						Editor.Call({ Type: "Reset" });
+					}
+				},
+				cancel: {
+					text: Localized.Get("取消")
+				}
+			}
+		});
+	}
+
 	// Initialize the editor.
 	Editor.Initialize = function() {
 		Editor.Container = $("#Main-Editor");
@@ -241,6 +342,25 @@ Editor = function() {
 			Object.keys(Line.gutterMarkers).forEach((Key) => {
 				Line.gutterMarkers[Key].Callback();
 			});
+		});
+		// Selection
+		MainEditor.on('beforeSelectionChange', (cm, obj) => {
+			if (obj.ranges.length == 0) return;
+			// Only identify single-line selections
+			var Range = obj.ranges[0];
+			if (Range.anchor.line != Range.head.line || Range.anchor.ch == Range.head.ch) {
+				Editor.ClearExplanation();
+				return;
+			}
+			// For different origins, we do differently
+			clearTimeout(ExplainHandle);
+			if (obj.origin == "double-tap") {
+				ExplainHandle = setTimeout(() => Editor.Explain(false), 1);
+			} else if (obj.origin != "triple-tap" && navigator.maxTouchPoints == 0) {
+				ExplainHandle = setTimeout(() => Editor.Explain(false), 500);
+			} else {
+				Editor.ClearExplanation();
+			}
 		});
 		// Customize KeyMap
 		MainEditor.addKeyMap({
@@ -298,11 +418,35 @@ Localized = function() {
 	// Get: Get localized string.
 	Localized.Get = function(Source) {
 		if (Localized.Data && Localized.Data.hasOwnProperty(Source))
-		 return Localized.Data[Source];
+			return Localized.Data[Source];
 		return Source;
 	}
 
 	return Localized;
+}();
+
+// Dictionary: Dictionary support.
+Dictionary = function() {
+	var Dictionary = {};
+
+	// Initialize: Initialize the manager with given data.
+	Dictionary.Initialize = function(Data) {
+		Dictionary.Data = Data;
+	}
+
+	// Get: Get dictionary string.
+	Dictionary.Get = function(Source) {
+		if (Dictionary.Check(Source.trim().toLowerCase()))
+			return Dictionary.Data[Source];
+		return Source;
+	}
+	
+	// Check: Check dictionary item.
+	Dictionary.Check = function(Source) {
+		return Dictionary.Data && Dictionary.Data.hasOwnProperty(Source.trim().toLowerCase());
+	}
+
+	return Dictionary;
 }();
 
 // Commands: Handle the interaction of CodeMirror command center.
@@ -397,7 +541,6 @@ Commands = function() {
 				CurrentCommandIndex += 1;
 				const index = CommandStack.length - CurrentCommandIndex;
 				Commands.SetContent(CommandStack[index][0], CommandStack[index][1]);
-				CommandEditor.setCursor(CommandEditor.lineCount(), 0);
 			}
 		});
 
@@ -409,17 +552,27 @@ Commands = function() {
 					if (CurrentCommand.length == 0) {
 						Commands.ClearInput();
 					} else {
-						Commands.SetContent(CurrentCommand[0], CurrentCommand[1]);
-						CommandEditor.setCursor(CommandEditor.lineCount(), 0);
+						Commands.SetContent(CurrentCommand[0], CurrentCommand[1]);x
 					}
 					return;
 				}
 				const index = CommandStack.length - CurrentCommandIndex;
 				Commands.SetContent(CommandStack[index][0], CommandStack[index][1]);
-				CommandEditor.setCursor(CommandEditor.lineCount(), 0);
 				CurrentCommandIndex -= 1;
 			}
 		});
+
+		// Listen to selection changed
+		/*var ExplainHandler = null;
+		if (navigator.maxTouchPoints == 0) {
+			document.addEventListener("selectionchange", () => {
+				clearTimeout(ExplainHandler);
+				ExplainHandler = setTimeout(() => {
+					clearTimeout(ExplainHandler);
+					Commands.Explain();
+				}, 500);
+			});
+		}*/
 
 		// Listen to the sizing
 		if (window.visualViewport)
@@ -472,12 +625,12 @@ Commands = function() {
 		switch (Class) {
 			case "CompilationError":
 				Output = $(`
-					<p class="CompilationError output">${Localized.Get("编译错误")}: ${Content}</p>
+					<p class="CompilationError output">${Localized.Get("抱歉，未能理解你输入的命令")}: ${Content}</p>
 				`).appendTo(Outputs);
 				break;
 			case "RuntimeError":
 				Output = $(`
-					<p class="RuntimeError output">${Localized.Get("执行错误")}: ${Content}</p>
+					<p class="RuntimeError output">${Content}</p>
 				`).appendTo(Outputs);
 				break;
 			case "Succeeded":
@@ -634,8 +787,10 @@ Commands = function() {
 
 	// Set the content of command input
 	Commands.SetContent = function(Objective, Content) {
-		CommandEditor.getDoc().setValue(Content);
 		document.querySelector('select').value = Objective.toLowerCase();
+		CommandEditor.getDoc().setValue(Content);
+		CommandEditor.focus();
+		CommandEditor.setCursor(Content.length);
 	}
 
 	// Provide for Unity to notify completion of the command
@@ -646,7 +801,10 @@ Commands = function() {
 	}
 
 	// Show the full text of a command.
+	var PreviousVisible = false;
 	Commands.ShowFullText = function(Data) {
+		PreviousVisible = Commands.Visible;
+		if (!Commands.Visible) Commands.Show();
 		// Change the status
 		Fulltext.show();
 		Outputs.hide();
@@ -685,10 +843,30 @@ Commands = function() {
 	}
 
 	// Hide the full text mode.
-	Commands.HideFullText = function() {
+	Commands.HideFullText = function(Explicit) {
 		Fulltext.hide();
 		Outputs.show();
 		Commands.ScrollToBottom();
+		if (Explicit && !PreviousVisible) Commands.Hide();
+	}
+
+	// Explain: Explain the selected text in the command center.
+	Commands.Explain = function() {
+		var Selection = window.getSelection();
+		if (Selection.rangeCount == 0) return;
+		var Parent = $(window.getSelection().focusNode).parents();
+		if (!Parent.is(".command-output")) return;
+		// Check the plain text
+		if (ExplainInternal(Selection.toString())) return;
+		// Check the grammatical tag
+		if (Parent.hasClass("cm-command") || Parent.hasClass("cm-reporter") || Parent.hasClass("cm-keyword")) 
+			ExplainInternal(Parent.get(0).innerText);
+	}
+
+	var ExplainInternal = function(Command) {
+		if (!Dictionary.Check(Command)) return false;
+		Commands.ScrollToBottom();
+		Commands.Execute(null, `ask ${Command} -full`);
 	}
 
 	return Commands;
