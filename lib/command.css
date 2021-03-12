@@ -15,9 +15,12 @@ div.command {
   line-height: 1.5;
 }
 
+.command-fulltext, .jconfirm, .jconfirm button {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', "Microsoft Yahei", sans-serif;
+}
+
 .command-fulltext {
   color: #333;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', "Microsoft Yahei", sans-serif;
   display: none;
   padding: 0 1rem;
   font-size: 1.1rem;

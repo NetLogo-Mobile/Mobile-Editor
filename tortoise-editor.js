@@ -289,7 +289,7 @@ Editor = function() {
 					btnClass: 'btn-primary',
 					keys: ['enter'],
 					action: function() {
-						Editor.Call({ Type: "Reset" });
+						Editor.Call({ Type: "CodeReset" });
 					}
 				},
 				cancel: {
@@ -546,13 +546,13 @@ Commands = function() {
 
 		// After press key `ArrowDown`, get next command from command history
 		CommandEditor.on('keydown', (cm, event) => {
-			if (event.key == "ArrowDown"|| event.code == "ArrowDown") {
+			if (event.key == "ArrowDown" || event.code == "ArrowDown") {
 				if (CurrentCommandIndex <= 1) {
 					CurrentCommandIndex = 0;
 					if (CurrentCommand.length == 0) {
 						Commands.ClearInput();
 					} else {
-						Commands.SetContent(CurrentCommand[0], CurrentCommand[1]);x
+						Commands.SetContent(CurrentCommand[0], CurrentCommand[1]);
 					}
 					return;
 				}
@@ -790,7 +790,7 @@ Commands = function() {
 		document.querySelector('select').value = Objective.toLowerCase();
 		CommandEditor.getDoc().setValue(Content);
 		CommandEditor.focus();
-		CommandEditor.setCursor(Content.length);
+		setTimeout(() => CommandEditor.setCursor(Content.length), 1);
 	}
 
 	// Provide for Unity to notify completion of the command
