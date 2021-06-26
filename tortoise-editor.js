@@ -24,7 +24,12 @@ Editor = function() {
 	// ShowErrors: Show the error tips & markers.
 	Editor.ShowErrors = function(Error) {
 		Editor.ClearHighlights();
-		Highlights.push(new Highlight("error", JSON.parse(Error)[0]).ShowAll());
+		var Message = JSON.parse(Error)[0];
+		if (Message.start == 2147483647) {
+			Editor.ShowTips(Message.message);
+		} else {
+			Highlights.push(new Highlight("error", Message).ShowAll());
+		}
 	}
 
 	// ClearHighlights: Clear all highlights.
@@ -185,18 +190,28 @@ Editor = function() {
 	}
 
 	// GetContent: Get the content of the editor.
-	Editor.GetContent = function() {
+	Editor.GetContent = function(Finalizing) {
+		if (Finalizing) {
+			Editor.Blur();
+			Commands.Blur();
+		}
 		return MainEditor.getValue();
 	}
 
 	// SetApplied: Set applied status.
 	Editor.SetApplied = function() {
 		Generation = MainEditor.doc.changeGeneration();
+		Editor.HideTips();
 	}
 
 	// SetReadonly: Set readonly status.
 	Editor.SetReadonly = function(Status) {
 		MainEditor.setOption("readOnly", Status);
+	}
+
+	// Blur: Blur the editor.
+	Editor.Blur = function() {
+		MainEditor.getInputField().blur();
 	}
 
 	// Undo: Undo last change.
@@ -492,6 +507,11 @@ Commands = function() {
 		Editor.MainEditor.refresh();
 	}
 
+	// Blur the command center's editor.
+	Commands.Blur = function() {
+		CommandEditor.getInputField().blur();
+	}
+
 	// Initialize the command center
 	Commands.Initialize = function() {
 		// Get the elements
@@ -575,11 +595,15 @@ Commands = function() {
 		}*/
 
 		// Listen to the sizing
-		if (window.visualViewport)
+		if (window.VisualViewport)
 			window.visualViewport.addEventListener("resize", () => {
-				var Height = window.visualViewport.height;
-				var Offset = window.innerHeight - Height;
-				$("#Container").css("height", `${Height}px`);
+				if (navigator.userAgent.indexOf("Macintosh") == -1) {
+					var Height = window.visualViewport.height;
+					var Offset = window.innerHeight - Height;
+					$("#Container").css("height", `${Height}px`);
+				} else {
+					setTimeout(() => $(".command-output").css("padding-top", `calc(0.5em + ${document.body.scrollHeight - window.visualViewport.height}px)`), 100);
+				}
 				if (Commands.Visible) $(".command-output").scrollTop(100000);
 			});
 			
