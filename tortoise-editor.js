@@ -8,7 +8,7 @@ Editor = function() {
 	// Obseleted: Tips
 	// Show the tips
 	Editor.ShowTips = function(Content, Callback) {
-		if (Callback == null) Callback = () => {};
+		if (Callback == null) Callback = () => { Editor.HideTips(); };
 		$("#Main-Tips").off("click").text(Content).click(Callback).show();
 		TipsActive = true;
 		Editor.ClearHighlights();
@@ -79,7 +79,7 @@ Editor = function() {
 		if (this.Message.indexOf("<span") != -1)
 			Element.html(this.Message);
 		else Element.text(this.Message);
-		Element[0].onclick = Callback != null ? Callback : () => this.HideTips();
+		Element.click(Callback != null ? Callback : () => this.HideTips());
 		this.TipsWidget = MainEditor.doc.addLineWidget(this.PositionFrom.line, Element[0], {});
 		return this;
 	}
@@ -167,6 +167,40 @@ Editor = function() {
 		});
 	}
 
+	// Interface-related
+	// ClearDialogs: Clear all dialogs.
+	Editor.ClearDialogs = function() {
+		var Dialog = $(".CodeMirror-dialog");
+		return Dialog.remove();
+	}
+
+	// Toast: Show a toast.
+	Editor.Toast = function(Type, Content, Subject) {
+		toastr[Type](Content, Subject);
+	}
+
+	// Confirm: Show a confirm.
+	Editor.Confirm = function(Subject, Content, OK, Cancel) {
+		$.confirm({
+			title: Localized.Get(Subject),
+			content: Localized.Get(Content),
+			type: 'green',
+			useBootstrap: false,
+			buttons: {   
+				ok: {
+					text: Localized.Get("确定"),
+					btnClass: 'btn-primary',
+					keys: ['enter'],
+					action: OK
+				},
+				cancel: {
+					text: Localized.Get("取消"),
+					action: Cancel
+				}
+			}
+		});
+	}
+
 	// Editor support
 	// SetContent: Set the content of the editor.
 	var Generation;
@@ -248,9 +282,36 @@ Editor = function() {
 		}
 	}
 
-	// ClearDialogs: Clear all dialogs.
-	Editor.ClearDialogs = function() {
-		$(".CodeMirror-dialog").remove();
+	// SelectAll: Select all text.
+	Editor.SelectAll = function() {
+		MainEditor.focus();
+		MainEditor.execCommand("selectAll");
+	}
+
+	// Reset: Show the reset dialog.
+	Editor.Reset = function() {
+		Editor.Confirm(Localized.Get("重置代码"), Localized.Get("是否将代码重置到最后一次成功编译的状态？"),
+			() => Editor.Call({ Type: "CodeReset" }));
+	}
+
+	// ShowMenu: Show a feature menu.
+	Editor.ShowMenu = function() {
+		var Dialog = $("#Dialog-Procedures")
+		var List = Dialog.children("ul").empty();
+		Dialog.children("h4").text(Localized.Get("更多功能"));
+		var Features = {};
+		Features[Localized.Get("选择全部")] = Editor.SelectAll;
+		Features[Localized.Get("撤销操作")] = Editor.Undo;
+		Features[Localized.Get("重做操作")] = Editor.Redo;
+		Features[Localized.Get("跳转到行")] = Editor.JumpTo;
+		Features[Localized.Get("重置代码")] = Editor.Reset;
+		for (var Feature in Features) {
+			$(`<li>${Feature}</li>`).attr("Tag", Feature).appendTo(List).click(function() {
+				Features[$(this).attr("Tag")]();
+				$.modal.close();
+			});
+		}
+		$("#Dialog-Procedures").modal({});
 	}
 
 	// ShowProcedures: List all procedures in the code.
@@ -259,17 +320,20 @@ Editor = function() {
 		if (Object.keys(Procedures).length == 0) {
 			Editor.Toast("warning", Localized.Get("代码中还没有任何子程序。"));
 		} else {
-			var List = $("#Dialog-Procedures ul").empty();
+			var Dialog = $("#Dialog-Procedures")
+			var List = Dialog.children("ul").empty();
+			Dialog.children("h4").text(Localized.Get("跳转到子程序"));
+			var Handler = function() {
+				var Start = MainEditor.doc.posFromIndex($(this).attr("start"));
+				var End = MainEditor.doc.posFromIndex($(this).attr("end"));
+				MainEditor.scrollIntoView(Start, 200);
+				MainEditor.setSelection(Start, End);
+				$.modal.close();
+			};
 			for (var Procedure in Procedures) {
 				$(`<li>${Procedure}</li>`).appendTo(List)
 					.attr("start", Procedures[Procedure][0])
-					.attr("end", Procedures[Procedure][1]).click(function() {
-					var Start = MainEditor.doc.posFromIndex($(this).attr("start"));
-					var End = MainEditor.doc.posFromIndex($(this).attr("end"));
-					MainEditor.scrollIntoView(Start, 200);
-					MainEditor.setSelection(Start, End);
-					$.modal.close();
-				});
+					.attr("end", Procedures[Procedure][1]).click(Handler);
 			}
 			$("#Dialog-Procedures").modal({});
 		}
@@ -284,34 +348,6 @@ Editor = function() {
 			Names[Match[1]] = [ Length - Match[1].length, Length ];
 		}
 		return Names;
-	}
-
-	// Toast: Show a toast.
-	Editor.Toast = function(Type, Content, Subject) {
-		toastr[Type](Content, Subject);
-	}
-
-	// Reset: Show the reset dialog.
-	Editor.Reset = function() {
-		$.confirm({
-			title: Localized.Get("重置代码"),
-			content: Localized.Get("是否将代码重置到最后一次成功编译的状态？"),
-			type: 'green',
-			useBootstrap: false,
-			buttons: {   
-				ok: {
-					text: Localized.Get("确定"),
-					btnClass: 'btn-primary',
-					keys: ['enter'],
-					action: function() {
-						Editor.Call({ Type: "CodeReset" });
-					}
-				},
-				cancel: {
-					text: Localized.Get("取消")
-				}
-			}
-		});
 	}
 
 	// Initialize the editor.
@@ -664,13 +700,13 @@ Commands = function() {
 				break;
 			case "Output":
 				var Last = Outputs.children().last();
-				if (Last.hasClass(Class)) {
+				/* if (Last.hasClass(Class)) {
 					Output = Last;
 					Last.get(0).innerText += Content;
-				} else {
-					Output = $(`<p class="Output output"></p>`).appendTo(Outputs);
-					Output.get(0).innerText = Content;
-				}
+				} else { */
+				Output = $(`<p class="Output output"></p>`).appendTo(Outputs);
+				Output.get(0).innerText = Content;
+				// }
 				break;
 			case "Help":
 				var Output = null;
