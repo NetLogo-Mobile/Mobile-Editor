@@ -3,6 +3,7 @@
 Editor = function() {
 	var Editor = {};
 	var MainEditor = null;
+	var DarkMode = null;
 
 	// UI support
 	// Obseleted: Tips
@@ -353,6 +354,7 @@ Editor = function() {
 	// Initialize the editor.
 	Editor.Initialize = function() {
 		Editor.Container = $("#Main-Editor");
+		DarkMode = new Darkmode();
 		// Basic initialization
 		MainEditor = CodeMirror(document.getElementById("Main-CodeMirror"), {
 			lineNumbers: true,
@@ -371,18 +373,19 @@ Editor = function() {
 			var token = cm.getTokenAt(cur);
 			var to = CodeMirror.Pos(cur.line, token.end);
 			if (token.string && /\S/.test(token.string[token.string.length - 1])) {
-				term = token.string
-				from = CodeMirror.Pos(cur.line, token.start)
+				term = token.string.toLowerCase();
+				from = CodeMirror.Pos(cur.line, token.start);
 			} else {
-				term = ''
-				from = to
+				term = '';
+				from = to;
 			}
-			found = options.words.filter((word) => word.slice(0, term.length) == term)
-			if (found.length > 0)
-				return { list: found, from: from, to: to }
+			found = options.words.filter((word) => word.slice(0, term.length) == term).map((word) => word.replace("\\?", "?")).sort();
+			if (found.length > 0 && !(found.length == 1 && found[0] == term))
+				return { list: found, from: from, to: to };
 		});
 		MainEditor.on('keyup', (cm, event) => {
-			if (!cm.state.completionActive && event.keyCode > 64 && event.keyCode < 91) {
+			if (cm.state.completionActive || event.ctrlKey) return;
+			if ((event.keyCode > 64 && event.keyCode < 91) || event.keyCode == 186 || event.keyCode == 189) {
 				cm.showHint({ completeSingle: false });
 			}
 		});
@@ -426,12 +429,18 @@ Editor = function() {
 	// Engine features
 	// Resize: Resize the viewport width (on mobile platforms)
 	Editor.Resize = function (Ratio) {
+		$("body").addClass("Mobile");
 		$("#viewport").attr("content", `width=device-width,initial-scale=${Ratio},maximum-scale=${Ratio},minimum-scale=${Ratio},user-scalable=no,viewport-fit=cover`);
 	}
 
 	// SetDesktop: Set the desktop mode.
 	Editor.SetFontsize = function(Status) {
 		$("html").css("font-size", Status + "px");
+	}
+
+	// ToggleDark: Toggle the dark mode.
+	Editor.ToggleDark = function(Status) {
+		if (Status != DarkMode.isActivated()) DarkMode.toggle();
 	}
 
 	// Call: Call the Unity engine.
@@ -573,6 +582,11 @@ Commands = function() {
 				const objective = $('#Command-Objective').val();
 				CurrentCommand = [objective, content];
 				CurrentCommandIndex = 0;
+			}
+			
+			if (cm.state.completionActive || event.ctrlKey) return;
+			if ((event.keyCode > 64 && event.keyCode < 91) || event.keyCode == 186 || event.keyCode == 189) {
+				cm.showHint({ completeSingle: false });
 			}
 		});
 

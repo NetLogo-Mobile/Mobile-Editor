@@ -17,7 +17,9 @@
   font-size: 90%;
   font-family: monospace;
 
-  max-height: 20em;
+  min-width: 5em;
+  max-height: 24em;
+  line-height: 1.2;
   overflow-y: auto;
 }
 
@@ -30,7 +32,13 @@
   cursor: pointer;
 }
 
-li.CodeMirror-hint-active {
-  background: #08f;
+li.CodeMirror-hint-active,
+li.CodeMirror-hint:hover {
+  background: #2881e0;
   color: white;
+}
+
+.darkmode--activated li.CodeMirror-hint-active,
+.darkmode--activated li.CodeMirror-hint:hover {
+  color: black;
 }

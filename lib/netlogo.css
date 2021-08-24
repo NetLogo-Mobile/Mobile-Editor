@@ -11,7 +11,7 @@ html, body, select {
 html {
 	font-size: 30px;
 }
-html, body, select, code, .CodeMirror-dialog input {
+html, body, select, code, .CodeMirror-dialog input, .CodeMirror-hints {
 	font-family: Consolas, "Droid Sans Mono", "Microsoft Yahei", monospace;
 }
 p {
@@ -22,6 +22,12 @@ p {
 	height: 100%;
 	overflow: hidden;
 	box-sizing: border-box;
+}
+
+/** Hints **/
+.Mobile .CodeMirror-hints {
+	max-height: 18em;
+	line-height: 1.8;
 }
 
 /** Code Editor **/
@@ -64,8 +70,25 @@ p {
 	line-height: 1.2;
 	background: #FFFFF0;
 }
+.darkmode--activated .CodeMirror-context-tips {
+	background: #CCC;
+}
 .CodeMirror pre.CodeMirror-line, .CodeMirror pre.CodeMirror-line-like {
 	padding: 0 0.13em 0 0.26em;
+}
+.darkmode--activated .CodeMirror-line::selection, 
+.darkmode--activated .CodeMirror-line > span::selection, 
+.darkmode--activated .CodeMirror-line > span > span::selection {
+	background-color: #909090;
+}
+.darkmode--activated .CodeMirror-selected,
+.darkmode--activated .CodeMirror-focused .CodeMirror-selected {
+	background-color: #909090;
+}
+.darkmode--activated .CodeMirror-line::-moz-selection, 
+.darkmode--activated .CodeMirror-line > span::-moz-selection, 
+.darkmode--activated .CodeMirror-line > span > span::-moz-selection {
+	background-color: #909090;
 }
 
 /* Overlays */
@@ -164,6 +187,9 @@ p {
 .Backdrop {
 	-webkit-backdrop-filter: blur(10px);
 }
+.darkmode-layer {
+	z-index: 256;
+}
 
 /*
 Copyright (C) 2011 by MarkLogic Corporation
@@ -210,6 +236,7 @@ THE SOFTWARE.
 .cm-s-netlogo-default span.cm-tag { color: #3F7F7F; }
 .cm-s-netlogo-default span.cm-attribute { color: #7F007F; }
 .cm-s-netlogo-default span.cm-error { color: #FFF; background: #CC2200; }
+.darkmode--activated .cm-s-netlogo-default span.cm-error { color: #000; background: #33DDFF; }
 .cm-s-netlogo-default span.cm-reporter { color: #660096; }
 
 .cm-s-netlogo-default .CodeMirror-activeline-background { background: #e8f2ff; }
