@@ -144,7 +144,7 @@ Editor = function() {
 				var Command = `<span class="cm-${Token.type}">${Token.string}</span>`
 				Packet.command = Token.string;
 				if (Dictionary.Check(Packet.command)) {
-					Packet.message = `${Command}: ${Dictionary.Get(Packet.command)} ➤`;
+					Packet.message = `${Command}: ${Dictionary.Get(Packet.command)} `;
 				} else if (Dictionary.Check("~" + Token.type)) {
 					Packet.message = Dictionary.Get("~" + Token.type).replace("{0}", Command);
 					Packet.command = null;
@@ -283,6 +283,16 @@ Editor = function() {
 		}
 	}
 
+	// JumpNetTango: Jump to the NetTango portion.
+	Editor.JumpNetTango = function() {
+		Commands.Hide();
+		var Index = Editor.GetContent().indexOf("; --- NETTANGO BEGIN ---");
+		if (Index == -1) return;
+		var Start = MainEditor.doc.posFromIndex(Index);
+		MainEditor.scrollTo(0, MainEditor.getScrollInfo().height);
+		MainEditor.scrollIntoView(Start, 0);
+	}
+
 	// SelectAll: Select all text.
 	Editor.SelectAll = function() {
 		MainEditor.focus();
@@ -384,9 +394,9 @@ Editor = function() {
 				return { list: found, from: from, to: to };
 		});
 		MainEditor.on('keyup', (cm, event) => {
-			if (cm.state.completionActive || event.ctrlKey) return;
+			if (cm.state.completionActive || event.ctrlKey || key.startsWith("Control")) return;
 			if ((event.keyCode > 64 && event.keyCode < 91) || event.keyCode == 186 || event.keyCode == 189) {
-				cm.showHint({ completeSingle: false });
+				cm.showHint({ completeSingle: false, container: $("#Container") });
 			}
 		});
 		// Click on gutter
@@ -584,9 +594,9 @@ Commands = function() {
 				CurrentCommandIndex = 0;
 			}
 			
-			if (cm.state.completionActive || event.ctrlKey) return;
+			if (cm.state.completionActive || event.ctrlKey || key.startsWith("Control")) return;
 			if ((event.keyCode > 64 && event.keyCode < 91) || event.keyCode == 186 || event.keyCode == 189) {
-				cm.showHint({ completeSingle: false });
+				cm.showHint({ completeSingle: false, container: $("#Container").get(0) });
 			}
 		});
 
@@ -594,6 +604,7 @@ Commands = function() {
 		CommandEditor.on('keydown', (cm, event) => {
 			if (event.key == "Enter" || event.code == "Enter") {
 				const content = CommandEditor.getValue().replace(/\n/ig, '');
+				Commands.ClearInput();
 				if (!content || Commands.Disabled) return;
 				const objective = $('#Command-Objective').val();
 				Commands.Disabled = true;
@@ -601,6 +612,7 @@ Commands = function() {
 				CommandStack.push([objective, content]);
 				CurrentCommandIndex = 0;
 				CurrentCommand = [];
+				CommandEditor.closeHint();
 			}
 		});
 
@@ -649,7 +661,6 @@ Commands = function() {
 			window.visualViewport.addEventListener("resize", () => {
 				if (navigator.userAgent.indexOf("Macintosh") == -1) {
 					var Height = window.visualViewport.height;
-					var Offset = window.innerHeight - Height;
 					$("#Container").css("height", `${Height}px`);
 				} else {
 					setTimeout(() => $(".command-output").css("padding-top", `calc(0.5em + ${document.body.scrollHeight - window.visualViewport.height}px)`), 100);
@@ -704,7 +715,7 @@ Commands = function() {
 				break;
 			case "RuntimeError":
 				Output = $(`
-					<p class="RuntimeError output">${Content}</p>
+					<p class="RuntimeError output">${Localized.Get(Content)}</p>
 				`).appendTo(Outputs);
 				break;
 			case "Succeeded":
@@ -856,7 +867,6 @@ Commands = function() {
 		Editor.Call({ Type: "CommandExecute", Source: Objective, Command: Content });
 		Commands.PrintInput(Objective, Content);
 		Commands.ScrollToBottom();
-		Commands.ClearInput();
 	}
 
 	// Set the content of command input

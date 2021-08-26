@@ -75,6 +75,10 @@ div.command {
   background: #F7F7F7;
 }
 
+.darkmode--activated .command-fulltext div.translator {
+  background: #CCCCCC;
+}
+
 .command-fulltext div.translator p {
   margin: 0;
 }
@@ -127,11 +131,11 @@ div.command {
 }
 
 .command-output .Comment {
-  color: #666;
+  color: #333;
 }
 
 .darkmode--activated .command-output .Comment {
-  color: #333;
+  color: #111;
 }
 
 .command-output .Help {

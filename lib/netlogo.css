@@ -11,8 +11,11 @@ html, body, select {
 html {
 	font-size: 30px;
 }
-html, body, select, code, .CodeMirror-dialog input, .CodeMirror-hints {
-	font-family: Consolas, "Droid Sans Mono", "Microsoft Yahei", monospace;
+code, .CodeMirror, .cm-s-netlogo-default, .CodeMirror-dialog input, .CodeMirror-hints {
+	font-family: Consolas, "Droid Sans Mono", "PingFangSC", "Microsoft Yahei", monospace;
+}
+html, body, select, .cm-s-netlogo-default span.cm-comment {
+	font-family: "Helvetica", "Noto Sans", "Roboto", "PingFangSC", "Microsoft Yahei", serif;
 }
 p {
 	margin: 0;
@@ -28,6 +31,18 @@ p {
 .Mobile .CodeMirror-hints {
 	max-height: 18em;
 	line-height: 1.8;
+}
+@media (max-device-height: 720px) {
+	.CodeMirror-hints,
+	.Mobile .CodeMirror-hints {
+		max-height: 12em;
+	}
+}
+@media (max-device-height: 480px) {
+	.CodeMirror-hints,
+	.Mobile .CodeMirror-hints {
+		max-height: 9em;
+	}
 }
 
 /** Code Editor **/
@@ -227,7 +242,8 @@ THE SOFTWARE.
 .cm-s-netlogo-default span.cm-variable-3, .cm-s-netlogo-default span.cm-type { color: black; }
 .cm-s-netlogo-default span.cm-property {}
 .cm-s-netlogo-default span.cm-operator {}
-.cm-s-netlogo-default span.cm-comment { color: #5A5A5A; font-style: italic; }
+.cm-s-netlogo-default span.cm-comment { color: #5A5A5A; }
+.darkmode--activated .cm-s-netlogo-default span.cm-comment { color: #333; }
 .cm-s-netlogo-default span.cm-string { color: #963700; }
 .cm-s-netlogo-default span.cm-meta { color: yellow; }
 .cm-s-netlogo-default span.cm-qualifier { color: grey; }

@@ -266,6 +266,7 @@
     // If we're at the edge of the screen, then we want the menu to appear on the left of the cursor.
     var winW = parentWindow.innerWidth || Math.max(ownerDocument.body.offsetWidth, ownerDocument.documentElement.offsetWidth);
     var winH = parentWindow.innerHeight || Math.max(ownerDocument.body.offsetHeight, ownerDocument.documentElement.offsetHeight);
+    winH = Math.min(winH, container.clientHeight);
     container.appendChild(hints);
 
     var box = completion.options.moveOnOverlap ? hints.getBoundingClientRect() : new DOMRect();
