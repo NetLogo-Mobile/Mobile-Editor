@@ -14,7 +14,7 @@ html {
 code, .CodeMirror, .cm-s-netlogo-default, .CodeMirror-dialog input, .CodeMirror-hints {
 	font-family: Consolas, "Droid Sans Mono", "PingFangSC", "Microsoft Yahei", monospace;
 }
-html, body, select, .cm-s-netlogo-default span.cm-comment {
+html, body, select {
 	font-family: "Helvetica", "Noto Sans", "Roboto", "PingFangSC", "Microsoft Yahei", serif;
 }
 p {

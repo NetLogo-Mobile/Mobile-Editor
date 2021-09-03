@@ -394,9 +394,9 @@ Editor = function() {
 				return { list: found, from: from, to: to };
 		});
 		MainEditor.on('keyup', (cm, event) => {
-			if (cm.state.completionActive || event.ctrlKey || key.startsWith("Control")) return;
+			if (cm.state.completionActive || event.ctrlKey || event.code.startsWith("Control")) return;
 			if ((event.keyCode > 64 && event.keyCode < 91) || event.keyCode == 186 || event.keyCode == 189) {
-				cm.showHint({ completeSingle: false, container: $("#Container") });
+				cm.showHint({ completeSingle: false, container: $("#Container").get(0) });
 			}
 		});
 		// Click on gutter
