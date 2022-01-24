@@ -453,6 +453,11 @@ Editor = function() {
 		if (Status != DarkMode.isActivated()) DarkMode.toggle();
 	}
 
+	// SetPlatform: Set the platform of the editor.
+	Editor.SetPlatform = function(Platform) {
+		$("body").addClass(Platform);
+	}
+
 	// Call: Call the Unity engine.
 	Editor.Call = function(Code) {
 		PostMessage(JSON.stringify(Code));
@@ -574,6 +579,7 @@ Commands = function() {
 		Outputs = $(".command-output");
 		Fulltext = $(".command-fulltext");
 		AnnotateCode(Outputs.find(".keep code"), null, true);
+		KeepSize = Outputs.children(".Keep").length;
 		// CodeMirror Editor
 		CommandEditor = CodeMirror(document.getElementById("Command-Input"), {
 			mode: "netlogo",
@@ -671,6 +677,41 @@ Commands = function() {
 		Commands.Show();
 	}
 
+	// Batch printing support
+	var Fragment = null;
+	// Buffer size
+	var BufferSize = 1000;
+	// Keep size
+	var KeepSize = -1;
+	// Print to a batch.
+	var WriteOutput = function(Element) {
+		if (Fragment == null)
+			Outputs.append(Element);
+		else Fragment.append(Element);
+	}
+	// Open a printing batch.
+	Commands.OpenBatch = function() {
+		Fragment = $(document.createDocumentFragment());
+	}
+	// Close a printing batch.
+	Commands.CloseBatch = function() {
+		if (Fragment == null) return;
+		// Trim the buffer (should refactor later) & the display
+		var Length = Fragment.children().length;
+		if (Length > BufferSize) {
+			Fragment.children().slice(0, Length - BufferSize).remove();
+			Outputs.children().slice(KeepSize).remove();
+		} else {
+			var NewLength = Outputs.children().length - KeepSize + Length;
+			if (NewLength > BufferSize)
+				Outputs.children().slice(KeepSize, NewLength - BufferSize + KeepSize).remove();
+		}
+		// Append to the display
+		Outputs.append(Fragment);
+		Fragment = null;
+		Commands.ScrollToBottom();
+	}
+
 	// Print a line of input to the screen
 	Commands.PrintInput = function(Objective, Content, Embedded) {
 		if (Objective == null) Objective = $('#Command-Objective').val();
@@ -690,13 +731,14 @@ Commands = function() {
 			</div>
 		`);
 		
-		if (!Embedded) Wrapper.appendTo(Outputs);
+		if (!Embedded) WriteOutput(Wrapper);
 		Wrapper.attr("objective", Objective);
 		Wrapper.attr("content", Content);
 
 		// Click to copy
 		Wrapper.children(".icon").on("click", () => {
 			Commands.SetContent(Wrapper.attr("objective"), Wrapper.attr("content"));
+			Editor.Call({ Type: "ClipboardWrite", Content: `${Wrapper.attr("objective")}: ${Wrapper.attr("content")}` });
 		});
 
 		// Run CodeMirror
@@ -711,44 +753,39 @@ Commands = function() {
 			case "CompilationError":
 				Output = $(`
 					<p class="CompilationError output">${Localized.Get("抱歉，未能理解你输入的命令")}: ${Content}</p>
-				`).appendTo(Outputs);
+				`);
 				break;
 			case "RuntimeError":
 				Output = $(`
 					<p class="RuntimeError output">${Localized.Get(Content)}</p>
-				`).appendTo(Outputs);
+				`);
 				break;
 			case "Succeeded":
 				Output = $(`
 					<p class="Succeeded output">${Localized.Get("成功执行了命令。")}</p>
-				`).appendTo(Outputs);
+				`);
 				break;
 			case "Output":
 				var Last = Outputs.children().last();
-				/* if (Last.hasClass(Class)) {
-					Output = Last;
-					Last.get(0).innerText += Content;
-				} else { */
-				Output = $(`<p class="Output output"></p>`).appendTo(Outputs);
+				Output = $(`<p class="Output output"></p>`);
 				Output.get(0).innerText = Content;
-				// }
 				break;
 			case "Help":
 				var Output = null;
 				if (typeof Content === 'string' || Content instanceof String) {
 					if (Content.indexOf("<div class=\"block\">") >= 0) {
-						Output = $(Content).appendTo(Outputs);
+						Output = $(Content);
 					} else {
 						Output = $(`
 							<p class="${Class} output">${Content}</p>
-						`).appendTo(Outputs);
+						`);
 					}
 				} else if (typeof Content === 'array' || Content instanceof Array) {
 					Output = $(`
 						<div class="block">
 							${Content.map((Source) => `<p class="${Class} output">${Source}</p>`).join("")}
 						</div>
-					`).appendTo(Outputs);
+					`);
 				} else if (Content.Parameter == "-full") {
 					this.ShowFullText(Content);
 				} else {
@@ -758,7 +795,7 @@ Commands = function() {
 							<p class="${Class} output">${Content["short_description"]} (<a class='command' target='help ${Content["display_name"]} -full'">${Localized.Get("阅读全文")}</a>)</p>
 							<p class="${Class} output">${Localized.Get("参见")}: ${Content["see_also"].map((Name) => `<a class='command' target='help ${Name}'>${Name}</a>`).join(", ")}</p>
 						</div>
-					`).appendTo(Outputs);
+					`);
 				}
 				if (Output != null) {
 					LinkCommand(Output.find("a.command"));
@@ -769,9 +806,10 @@ Commands = function() {
 			default:
 				var Output = $(`
 					<p class="${Class} output">${Content}</p>
-				`).appendTo(Outputs);
+				`);
 				break;
 		}
+		WriteOutput(Output);
 
 		/*Output.on("click", (event) => {
 			previousNode = event.path[0].previousElementSibling;
@@ -782,7 +820,7 @@ Commands = function() {
 			}
 		});*/
 
-		Commands.ScrollToBottom();
+		if (Fragment == null) Commands.ScrollToBottom();
 	}
 	
 	/* Rendering stuff */
@@ -853,7 +891,7 @@ Commands = function() {
 
 	// Clear the output region of Command Center
 	Commands.ClearOutput = function() {
-		Outputs.children(":not(.Keep)").remove();
+		Outputs.children().slice(KeepSize).remove();
 	}
 
 	// After user entered input, screen view should scroll down to the botom line
