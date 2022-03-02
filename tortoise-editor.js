@@ -144,7 +144,7 @@ Editor = function() {
 				var Command = `<span class="cm-${Token.type}">${Token.string}</span>`
 				Packet.command = Token.string;
 				if (Dictionary.Check(Packet.command)) {
-					Packet.message = `${Command}: ${Dictionary.Get(Packet.command)} `;
+					Packet.message = `${Command}: ${Dictionary.Get(Packet.command)} ➤`;
 				} else if (Dictionary.Check("~" + Token.type)) {
 					Packet.message = Dictionary.Get("~" + Token.type).replace("{0}", Command);
 					Packet.command = null;
@@ -551,6 +551,7 @@ Commands = function() {
 		Commands.Container.css("display", "block");
 		bodyScrollLock.clearAllBodyScrollLocks();
 		bodyScrollLock.disableBodyScroll(document.querySelector('div.command-output'));
+		bodyScrollLock.disableBodyScroll(document.querySelector('div.command-fulltext'));
 		CommandEditor.refresh();
 		Commands.HideFullText();
 		Commands.Visible = true;
@@ -957,7 +958,7 @@ Commands = function() {
 			if (Content != null) Fulltext.find("div.fulltext")
 				.html(new showdown.Converter().makeHtml(Content));
 			AnnotateCode(Fulltext.find("code"), null, true);
-			document.querySelector('.command-fulltext').scrollTop = 0;
+			Fulltext.get(0).scrollTop = 0;
 		}
 		SetContent(Data["translation"] != null ? Data["translation"] : Data["content"]);
 		// Acknowledge
