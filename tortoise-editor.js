@@ -666,11 +666,11 @@ Commands = function() {
 		// Listen to the sizing
 		if (window.VisualViewport)
 			window.visualViewport.addEventListener("resize", () => {
-				if (navigator.userAgent.indexOf("Macintosh") == -1) {
+				if (navigator.userAgent.indexOf("Macintosh") == -1 && navigator.userAgent.indexOf("Mac OS X") == -1) {
 					var Height = window.visualViewport.height;
 					$("#Container").css("height", `${Height}px`);
 				} else {
-					setTimeout(() => $(".command-output").css("padding-top", `calc(0.5em + ${document.body.scrollHeight - window.visualViewport.height}px)`), 100);
+					setTimeout(() => $(".command-output, .command-fulltext").css("padding-top", `calc(0.5em + ${document.body.scrollHeight - window.visualViewport.height}px)`), 100);
 				}
 				if (Commands.Visible) $(".command-output").scrollTop(100000);
 			});
