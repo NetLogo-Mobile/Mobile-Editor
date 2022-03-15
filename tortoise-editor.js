@@ -144,7 +144,7 @@ Editor = function() {
 				var Command = `<span class="cm-${Token.type}">${Token.string}</span>`
 				Packet.command = Token.string;
 				if (Dictionary.Check(Packet.command)) {
-					Packet.message = `${Command}: ${Dictionary.Get(Packet.command)} ➤`;
+					Packet.message = `${Command}: ${Dictionary.Get(Packet.command)} ➲`;
 				} else if (Dictionary.Check("~" + Token.type)) {
 					Packet.message = Dictionary.Get("~" + Token.type).replace("{0}", Command);
 					Packet.command = null;
