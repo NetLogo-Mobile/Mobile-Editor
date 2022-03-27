@@ -458,6 +458,16 @@ Editor = function() {
 		$("body").addClass(Platform);
 	}
 
+	// TransformLinks: Transform the embedded links.
+	Editor.TransformLinks = function(Element) {
+		Element.find("a").each((Index, Link) => {
+			Link = $(Link);
+			var Href = Link.attr("href");
+			Link.attr("href", "javascript:void(0);");
+			Link.on("click", function() { Editor.Call({ Type: "Visit", Target: Href })});
+		});
+	}
+
 	// Call: Call the Unity engine.
 	Editor.Call = function(Code) {
 		PostMessage(JSON.stringify(Code));
@@ -962,7 +972,7 @@ Commands = function() {
 		}
 		SetContent(Data["translation"] != null ? Data["translation"] : Data["content"]);
 		// Acknowledge
-		Fulltext.find(".Acknowledge").text(Data["acknowledge"])
+		Editor.TransformLinks(Fulltext.find(".Acknowledge").html(Data["acknowledge"]));
 	}
 
 	// Hide the full text mode.
